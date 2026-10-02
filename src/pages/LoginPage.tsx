@@ -23,8 +23,8 @@ export const LoginPage: React.FC = () => {
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: 'recepcao@pousadapinhoverde.com.br',
-      password: 'senha123',
+      email: '',
+      password: '',
     },
   });
 
