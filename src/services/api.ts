@@ -23,7 +23,7 @@ import {
 import { reservaSchema } from '../schemas/reservaSchema';
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+  import.meta.env.VITE_API_BASE_URL || '/api';
 
 const STORAGE_KEY_RESERVAS = 'pinho_verde_reservas_v1';
 const STORAGE_KEY_SESSION = 'pinho_verde_demo_session_v1';
