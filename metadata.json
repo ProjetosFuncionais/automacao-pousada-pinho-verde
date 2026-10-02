@@ -1,0 +1,6 @@
+{
+  "name": "Pousada Pinho Verde — Gestão de Reservas e Vouchers",
+  "description": "Sistema web de gestão de reservas, cálculo automático de saldo e emissão de vouchers para a Pousada Pinho Verde.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
