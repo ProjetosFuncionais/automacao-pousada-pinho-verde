@@ -18,10 +18,16 @@
   }
 }
 
+/* Margem zero remove o cabeçalho/rodapé do navegador (URL, data e título) na impressão */
+@page {
+  margin: 0;
+}
+
 @media print {
   body {
     background-color: #FFFFFF !important;
     color: #000000 !important;
+    padding: 8mm !important;
   }
 
   .no-print {

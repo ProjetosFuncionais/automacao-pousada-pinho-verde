@@ -274,8 +274,8 @@ export const VoucherPage: React.FC = () => {
           </ul>
         </section>
 
-        {/* Rodapé de Autenticidade do Voucher */}
-        <footer className="pt-6 border-t border-slate-300 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-500 font-mono tabular-nums">
+        {/* Rodapé de Autenticidade do Voucher (apenas na tela, oculto na impressão) */}
+        <footer className="no-print pt-6 border-t border-slate-300 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-500 font-mono tabular-nums">
           <span>ID da Reserva: {reserva.id}</span>
           <span>
             Emitido em {formatarDataHoraBR(voucher.emitido_em)} por{' '}
