@@ -218,11 +218,11 @@ export const ReservaFormPage: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Cabeçalho */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4 sm:pb-5">
         <div className="space-y-1">
           <Link
             to="/reservas"
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 hover:text-slate-900"
+            className="inline-flex items-center gap-1.5 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-900"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Voltar para a lista de reservas</span>
@@ -256,7 +256,7 @@ export const ReservaFormPage: React.FC = () => {
       <form
         onSubmit={handleSubmit(onSubmit)}
         noValidate
-        className="bg-white border border-slate-200 rounded-xl p-6 sm:p-8 space-y-8"
+        className="bg-white border border-slate-200 rounded-xl p-4 sm:p-8 space-y-7 sm:space-y-8"
       >
         {/* Seção 1: Dados do Hóspede */}
         <div className="space-y-4">
@@ -280,6 +280,8 @@ export const ReservaFormPage: React.FC = () => {
               <input
                 id="nome_completo"
                 type="text"
+                autoComplete="off"
+                autoCapitalize="words"
                 placeholder="Ex: Mariana Costa Mendes"
                 {...register('nome_completo')}
                 className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:border-emerald-700"
@@ -360,7 +362,7 @@ export const ReservaFormPage: React.FC = () => {
 
         {/* Seção 2: Acomodação e Período */}
         <div className="space-y-4">
-          <div className="border-b border-slate-100 pb-2 flex items-center justify-between">
+          <div className="border-b border-slate-100 pb-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
             <div>
               <h2 className="text-base font-semibold text-slate-900">
                 02. Acomodação e Período de Estadia
@@ -377,8 +379,8 @@ export const ReservaFormPage: React.FC = () => {
             )}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
-            <div className="sm:col-span-5">
+          <div className="grid grid-cols-2 sm:grid-cols-12 gap-4">
+            <div className="col-span-2 sm:col-span-4">
               <label
                 htmlFor="numero_chale"
                 className="block text-xs font-semibold text-slate-700 mb-1.5"
@@ -404,7 +406,7 @@ export const ReservaFormPage: React.FC = () => {
               )}
             </div>
 
-            <div className="sm:col-span-2">
+            <div className="col-span-2 sm:col-span-2">
               <label
                 htmlFor="quantidade_pessoas"
                 className="block text-xs font-semibold text-slate-700 mb-1.5"
@@ -414,6 +416,7 @@ export const ReservaFormPage: React.FC = () => {
               <input
                 id="quantidade_pessoas"
                 type="number"
+                inputMode="numeric"
                 min={1}
                 step={1}
                 {...register('quantidade_pessoas', { valueAsNumber: true })}
@@ -426,12 +429,12 @@ export const ReservaFormPage: React.FC = () => {
               )}
             </div>
 
-            <div className="sm:col-span-2.5">
+            <div className="min-w-0 sm:col-span-3">
               <label
                 htmlFor="data_checkin"
                 className="block text-xs font-semibold text-slate-700 mb-1.5"
               >
-                Data Check-in *
+                Check-in *
               </label>
               <input
                 id="data_checkin"
@@ -446,12 +449,12 @@ export const ReservaFormPage: React.FC = () => {
               )}
             </div>
 
-            <div className="sm:col-span-2.5">
+            <div className="min-w-0 sm:col-span-3">
               <label
                 htmlFor="data_checkout"
                 className="block text-xs font-semibold text-slate-700 mb-1.5"
               >
-                Data Check-out *
+                Check-out *
               </label>
               <input
                 id="data_checkout"
@@ -482,7 +485,7 @@ export const ReservaFormPage: React.FC = () => {
             <button
               type="button"
               onClick={aplicarSinalCinquentaPorCento}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-800 hover:text-emerald-950 cursor-pointer self-start sm:self-auto"
+              className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 sm:p-0 text-xs font-semibold text-emerald-800 hover:text-emerald-950 bg-emerald-50 sm:bg-transparent rounded-lg cursor-pointer"
             >
               <Calculator className="w-3.5 h-3.5" />
               <span>Preencher sinal de 50% automaticamente</span>
@@ -568,7 +571,7 @@ export const ReservaFormPage: React.FC = () => {
           <textarea
             id="descricao"
             rows={3}
-            placeholder="Ex: Solicitação de berço extra, restrição alimentar no café da manhã, horário previsto de chegada..."
+            placeholder="Ex: berço extra, restrição alimentar, horário previsto de chegada..."
             {...register('descricao')}
             className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:border-emerald-700"
           />
@@ -580,21 +583,21 @@ export const ReservaFormPage: React.FC = () => {
         </div>
 
         {/* Rodapé de Ações */}
-        <div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <p className="text-xs text-slate-500">
             O voucher oficial poderá ser visualizado e impresso imediatamente após salvar a reserva.
           </p>
-          <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+          <div className="flex flex-col-reverse sm:flex-row sm:items-center gap-3 w-full sm:w-auto sm:justify-end">
             <Link
               to="/reservas"
-              className="px-4 py-2.5 text-xs font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg transition-colors whitespace-nowrap"
+              className="px-4 py-3 sm:py-2.5 text-sm sm:text-xs text-center font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg transition-colors whitespace-nowrap"
             >
               Cancelar
             </Link>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs font-semibold text-white bg-emerald-800 hover:bg-emerald-900 rounded-lg transition-colors whitespace-nowrap cursor-pointer disabled:opacity-60"
+              className="inline-flex items-center justify-center gap-2 px-5 py-3 sm:py-2.5 text-sm sm:text-xs font-semibold text-white bg-emerald-800 hover:bg-emerald-900 rounded-lg transition-colors whitespace-nowrap cursor-pointer disabled:opacity-60"
             >
               <Save className="w-4 h-4" />
               <span>

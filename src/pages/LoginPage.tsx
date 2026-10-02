@@ -51,7 +51,7 @@ export const LoginPage: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-[#F8FAF9]">
       {/* Coluna Institucional */}
-      <div className="lg:w-5/12 bg-[#0F291E] text-white p-8 lg:p-14 flex flex-col justify-between">
+      <div className="lg:w-5/12 bg-[#0F291E] text-white px-6 pt-[max(1.5rem,env(safe-area-inset-top))] pb-6 lg:p-14 flex flex-col justify-between">
         <div className="flex items-center gap-3">
           <Trees className="w-7 h-7 text-emerald-400" />
           <span className="font-display text-xl font-semibold tracking-tight">
@@ -59,34 +59,34 @@ export const LoginPage: React.FC = () => {
           </span>
         </div>
 
-        <div className="my-12 lg:my-0 space-y-4 max-w-md">
-          <p className="text-xs font-medium text-emerald-300/90">
+        <div className="mt-5 lg:mt-0 space-y-2 lg:space-y-4 max-w-md">
+          <p className="hidden lg:block text-xs font-medium text-emerald-300/90">
             Serra da Mantiqueira · Portal Interno de Colaboradores
           </p>
-          <h1 className="font-display text-3xl lg:text-4xl font-semibold leading-tight text-white">
+          <h1 className="font-display text-xl sm:text-3xl lg:text-4xl font-semibold leading-tight text-white">
             Sistema de Vouchers e Gestão de Reservas
           </h1>
-          <p className="text-sm text-emerald-100/80 leading-relaxed">
+          <p className="hidden lg:block text-sm text-emerald-100/80 leading-relaxed">
             Controle centralizado de reservas de chalés, cálculo automático de
             saldo financeiro e emissão padronizada de vouchers de hospedagem.
           </p>
         </div>
 
-        <div className="text-xs text-emerald-200/70 space-y-1 border-t border-emerald-900 pt-6">
+        <div className="hidden lg:block text-xs text-emerald-200/70 space-y-1 border-t border-emerald-900 pt-6">
           <p>Horários oficiais: Check-in às 15h · Check-out às 12h</p>
           <p>Acesso exclusivo para recepção e administração autorizada.</p>
         </div>
       </div>
 
       {/* Coluna do Formulário de Autenticação */}
-      <div className="flex-1 flex items-center justify-center p-6 sm:p-12">
-        <div className="w-full max-w-md bg-white border border-slate-200 rounded-xl p-8 space-y-6">
+      <div className="flex-1 flex items-start lg:items-center justify-center p-4 sm:p-12">
+        <div className="w-full max-w-md bg-white border border-slate-200 rounded-xl p-5 sm:p-8 space-y-6">
           <div className="space-y-1.5">
             <h2 className="font-display text-2xl font-semibold text-slate-900">
               Acesso ao Sistema
             </h2>
             <p className="text-sm text-slate-600">
-              Entre com suas credenciais do Supabase Auth para gerenciar as reservas.
+              Entre com seu e-mail e senha de colaborador para gerenciar as reservas.
             </p>
           </div>
 
@@ -113,8 +113,11 @@ export const LoginPage: React.FC = () => {
                 <input
                   id="email"
                   type="email"
+                  inputMode="email"
                   autoComplete="email"
-                  placeholder="recepcao@pousadapinhoverde.com.br"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  placeholder="voce@pousadapinhoverde.com.br"
                   {...register('email')}
                   className="w-full pl-10 pr-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:border-emerald-700"
                 />
@@ -152,7 +155,7 @@ export const LoginPage: React.FC = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-2.5 px-4 text-sm font-semibold text-white bg-emerald-800 hover:bg-emerald-900 rounded-lg transition-colors cursor-pointer disabled:opacity-60"
+              className="w-full py-3 sm:py-2.5 px-4 text-sm font-semibold text-white bg-emerald-800 hover:bg-emerald-900 rounded-lg transition-colors cursor-pointer disabled:opacity-60"
             >
               {isSubmitting ? 'Autenticando...' : 'Entrar no Sistema'}
             </button>

@@ -11,12 +11,14 @@ import {
   Edit3,
   FileText,
   Ban,
+  MessageCircle,
   XCircle,
 } from 'lucide-react';
 import { apiService, ApiClientError } from '../services/api';
 import { Reserva } from '../types/reserva';
 import {
   calcularQuantidadeDiarias,
+  extrairDigitos,
   formatarDataBR,
   formatarDataHoraBR,
   formatarMoedaBRL,
@@ -110,20 +112,20 @@ export const ReservaDetailPage: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Cabeçalho e Ações Principais */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-5">
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 border-b border-slate-200 pb-4 sm:pb-5">
         <div className="space-y-1.5">
           <Link
             to="/reservas"
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 hover:text-slate-900"
+            className="inline-flex items-center gap-1.5 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-900"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Voltar para a lista de reservas</span>
           </Link>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="font-display text-2xl sm:text-3xl font-semibold text-slate-900">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <h1 className="font-display text-2xl sm:text-3xl font-semibold text-slate-900 break-words min-w-0">
               {reserva.nome_completo}
             </h1>
-            <span className="text-slate-400" aria-hidden="true">
+            <span className="hidden sm:inline text-slate-400" aria-hidden="true">
               ·
             </span>
             {reserva.status === 'confirmada' ? (
@@ -139,15 +141,18 @@ export const ReservaDetailPage: React.FC = () => {
             )}
           </div>
           <p className="font-mono tabular-nums text-xs text-slate-500">
-            Código: {obterCodigoCurtoReserva(reserva.id)} · ID UUID:{' '}
-            {reserva.id}
+            Código: {obterCodigoCurtoReserva(reserva.id)}
+            <span className="hidden sm:inline">
+              {' '}
+              · ID UUID: {reserva.id}
+            </span>
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap sm:items-center gap-2.5">
           <Link
             to={`/reservas/${reserva.id}/voucher`}
-            className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-emerald-800 hover:bg-emerald-900 rounded-lg transition-colors whitespace-nowrap"
+            className="col-span-2 inline-flex items-center justify-center gap-2 px-4 py-3 sm:py-2 text-sm sm:text-xs font-semibold text-white bg-emerald-800 hover:bg-emerald-900 rounded-lg transition-colors whitespace-nowrap"
           >
             <FileText className="w-4 h-4" />
             <span>Gerar / Imprimir Voucher</span>
@@ -157,7 +162,7 @@ export const ReservaDetailPage: React.FC = () => {
             <>
               <Link
                 to={`/reservas/${reserva.id}/editar`}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg transition-colors whitespace-nowrap"
+                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-3 sm:py-2 text-sm sm:text-xs font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg transition-colors whitespace-nowrap"
               >
                 <Edit3 className="w-3.5 h-3.5" />
                 <span>Editar</span>
@@ -165,7 +170,7 @@ export const ReservaDetailPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setModalCancelarAberto(true)}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-red-700 bg-white border border-red-200 hover:bg-red-50 rounded-lg transition-colors whitespace-nowrap cursor-pointer"
+                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-3 sm:py-2 text-sm sm:text-xs font-medium text-red-700 bg-white border border-red-200 hover:bg-red-50 rounded-lg transition-colors whitespace-nowrap cursor-pointer"
               >
                 <Ban className="w-3.5 h-3.5" />
                 <span>Cancelar Reserva</span>
@@ -188,22 +193,22 @@ export const ReservaDetailPage: React.FC = () => {
       )}
 
       {/* Resumo Financeiro da Reserva */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-1">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+        <div className="bg-white border border-slate-200 rounded-xl p-3.5 sm:p-5 space-y-1 min-w-0">
           <p className="text-xs text-slate-500">Valor Total da Hospedagem</p>
-          <p className="font-mono tabular-nums text-xl font-semibold text-slate-900">
+          <p className="font-mono tabular-nums text-base sm:text-xl font-semibold text-slate-900">
             {formatarMoedaBRL(reserva.valor_total_hospedagem)}
           </p>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-1">
+        <div className="bg-white border border-slate-200 rounded-xl p-3.5 sm:p-5 space-y-1 min-w-0">
           <p className="text-xs text-slate-500">Valor Total Pago</p>
-          <p className="font-mono tabular-nums text-xl font-semibold text-emerald-800">
+          <p className="font-mono tabular-nums text-base sm:text-xl font-semibold text-emerald-800">
             {formatarMoedaBRL(reserva.valor_total_pago)}
           </p>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-1">
+        <div className="col-span-2 sm:col-span-1 bg-white border border-slate-200 rounded-xl p-3.5 sm:p-5 space-y-1 min-w-0">
           <p className="text-xs text-slate-500">
             Saldo a Receber no Check-in (Automático)
           </p>
@@ -215,7 +220,7 @@ export const ReservaDetailPage: React.FC = () => {
 
       {/* Dados Detalhados em Painel Único */}
       <div className="bg-white border border-slate-200 rounded-xl divide-y divide-slate-200">
-        <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div className="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div className="space-y-3">
             <h2 className="text-xs font-semibold text-slate-500">
               Dados do Hóspede Titular
@@ -236,7 +241,15 @@ export const ReservaDetailPage: React.FC = () => {
               <div>
                 <dt className="text-xs text-slate-500">WhatsApp</dt>
                 <dd className="font-mono tabular-nums text-slate-800">
-                  {reserva.whatsapp}
+                  <a
+                    href={`https://wa.me/55${extrairDigitos(reserva.whatsapp)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 py-1 text-emerald-800 underline underline-offset-4"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    <span>{reserva.whatsapp}</span>
+                  </a>
                 </dd>
               </div>
               <div>
@@ -269,8 +282,13 @@ export const ReservaDetailPage: React.FC = () => {
                   Período ({diarias} {diarias === 1 ? 'diária' : 'diárias'})
                 </dt>
                 <dd className="font-mono tabular-nums text-slate-800">
-                  Check-in: {formatarDataBR(reserva.data_checkin)} (às 15h) ·
-                  Check-out: {formatarDataBR(reserva.data_checkout)} (às 12h)
+                  <span className="block sm:inline">
+                    Check-in: {formatarDataBR(reserva.data_checkin)} (às 15h)
+                  </span>
+                  <span className="hidden sm:inline"> · </span>
+                  <span className="block sm:inline">
+                    Check-out: {formatarDataBR(reserva.data_checkout)} (às 12h)
+                  </span>
                 </dd>
               </div>
               <div>
@@ -283,7 +301,7 @@ export const ReservaDetailPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="px-6 py-4 bg-slate-50/60 text-xs text-slate-500 flex flex-col sm:flex-row sm:items-center justify-between gap-2 font-mono tabular-nums">
+        <div className="px-4 sm:px-6 py-4 bg-slate-50/60 text-xs text-slate-500 flex flex-col sm:flex-row sm:items-center justify-between gap-2 font-mono tabular-nums">
           <span>Criado em: {formatarDataHoraBR(reserva.created_at)}</span>
           <span>Última atualização: {formatarDataHoraBR(reserva.updated_at)}</span>
         </div>

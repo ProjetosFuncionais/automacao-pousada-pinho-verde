@@ -5,6 +5,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
+  Ban,
   CalendarPlus,
   CheckCircle2,
   Eye,
@@ -21,6 +22,7 @@ import {
   obterCodigoCurtoReserva,
 } from '../utils/formatters';
 import { ConfirmCancelModal } from '../components/ConfirmCancelModal';
+import { ReservaCard } from '../components/ReservaCard';
 
 export const ReservasListPage: React.FC = () => {
   const [reservas, setReservas] = useState<Reserva[]>([]);
@@ -83,18 +85,20 @@ export const ReservasListPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Cabeçalho */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-4 sm:pb-5">
         <div className="space-y-1">
           <p className="text-xs font-medium text-slate-500">
-            Consulta e Histórico Completo · Pousada Pinho Verde
+            Consulta e Histórico Completo
+            <span className="hidden sm:inline"> · Pousada Pinho Verde</span>
           </p>
           <h1 className="font-display text-2xl sm:text-3xl font-semibold text-slate-900">
             Lista de Reservas
           </h1>
         </div>
+        {/* Em telas menores a ação "Nova reserva" fica na barra de navegação inferior */}
         <Link
           to="/reservas/nova"
-          className="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-emerald-800 hover:bg-emerald-900 rounded-lg transition-colors whitespace-nowrap self-start sm:self-auto"
+          className="hidden lg:inline-flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-emerald-800 hover:bg-emerald-900 rounded-lg transition-colors whitespace-nowrap"
         >
           <CalendarPlus className="w-4 h-4" />
           <span>Nova Reserva</span>
@@ -129,21 +133,23 @@ export const ReservasListPage: React.FC = () => {
       )}
 
       {/* Barra de Busca e Filtro de Status (Segmented Control Interativo) */}
-      <div className="bg-white border border-slate-200 rounded-xl p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+      <div className="bg-white border border-slate-200 rounded-xl p-3 sm:p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 sm:gap-4">
         <div className="relative flex-1">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="search"
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
-            placeholder="Buscar por nome do hóspede, CPF, WhatsApp, chalé ou código (ex: PPV-9B1DEB4D)..."
+            enterKeyHint="search"
+            aria-label="Buscar por nome do hóspede, CPF, WhatsApp, chalé ou código"
+            placeholder="Nome, CPF, chalé ou código"
             className="w-full pl-10 pr-9 py-2 text-sm bg-slate-50/70 border border-slate-300 rounded-lg focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:border-emerald-700"
           />
           {busca && (
             <button
               type="button"
               onClick={() => setBusca('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+              className="absolute right-1 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-slate-600 cursor-pointer"
               aria-label="Limpar busca"
             >
               <X className="w-4 h-4" />
@@ -164,7 +170,7 @@ export const ReservasListPage: React.FC = () => {
               key={item.valor}
               type="button"
               onClick={() => setStatusFiltro(item.valor)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap cursor-pointer ${
+              className={`flex-1 md:flex-none px-3 py-2.5 sm:py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap cursor-pointer ${
                 statusFiltro === item.valor
                   ? 'bg-white text-slate-900 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
@@ -176,8 +182,25 @@ export const ReservasListPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Tabela de Resultados */}
-      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+      {/* Resultados em Cartões (celular e tablet) */}
+      {!carregando && reservas.length > 0 && (
+        <div className="lg:hidden grid grid-cols-1 md:grid-cols-2 gap-3">
+          {reservas.map((reserva) => (
+            <ReservaCard
+              key={reserva.id}
+              reserva={reserva}
+              onCancelar={setReservaParaCancelar}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Tabela de Resultados (desktop) e estados de carregamento / lista vazia */}
+      <div
+        className={`bg-white border border-slate-200 rounded-xl overflow-hidden ${
+          !carregando && reservas.length > 0 ? 'hidden lg:block' : ''
+        }`}
+      >
         {carregando ? (
           <div className="p-6 space-y-3">
             {[1, 2, 3, 4].map((n) => (
@@ -188,7 +211,7 @@ export const ReservasListPage: React.FC = () => {
             ))}
           </div>
         ) : reservas.length === 0 ? (
-          <div className="p-12 text-center space-y-3">
+          <div className="p-8 sm:p-12 text-center space-y-3">
             <p className="text-sm font-medium text-slate-800">
               Nenhuma reserva encontrada para os filtros informados.
             </p>
@@ -202,7 +225,7 @@ export const ReservasListPage: React.FC = () => {
                   setBusca('');
                   setStatusFiltro('todas');
                 }}
-                className="px-4 py-2 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
+                className="px-4 py-3 sm:py-2 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
               >
                 Limpar Filtros
               </button>
@@ -213,13 +236,12 @@ export const ReservasListPage: React.FC = () => {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50/70 text-xs font-semibold text-slate-600">
-                  <th className="py-3 px-5">Código</th>
-                  <th className="py-3 px-4">Hóspede · CPF · WhatsApp</th>
-                  <th className="py-3 px-4">Chalé · Ocupação</th>
-                  <th className="py-3 px-4">Período</th>
-                  <th className="py-3 px-4 text-right">Total / Pago</th>
-                  <th className="py-3 px-4 text-right">Saldo a Receber</th>
-                  <th className="py-3 px-4">Status</th>
+                  <th className="py-3 px-5">Hóspede · Código · CPF</th>
+                  <th className="py-3 px-3">Chalé · Ocupação</th>
+                  <th className="py-3 px-3">Período</th>
+                  <th className="py-3 px-3 text-right">Total / Pago</th>
+                  <th className="py-3 px-3 text-right">Saldo a Receber</th>
+                  <th className="py-3 px-3">Status</th>
                   <th className="py-3 px-5 text-right">Ações</th>
                 </tr>
               </thead>
@@ -229,31 +251,33 @@ export const ReservasListPage: React.FC = () => {
                     key={reserva.id}
                     className="hover:bg-slate-50/80 transition-colors"
                   >
-                    <td className="py-3.5 px-5 font-mono tabular-nums text-xs font-semibold text-slate-700 whitespace-nowrap">
-                      {obterCodigoCurtoReserva(reserva.id)}
-                    </td>
-                    <td className="py-3.5 px-4">
+                    <td className="py-3.5 px-5">
                       <div className="font-medium text-slate-900">
                         {reserva.nome_completo}
                       </div>
                       <div className="text-xs text-slate-500 font-mono tabular-nums">
-                        {reserva.cpf} · {reserva.whatsapp}
+                        <span className="block whitespace-nowrap">
+                          {obterCodigoCurtoReserva(reserva.id)}
+                        </span>
+                        <span className="block whitespace-nowrap">
+                          CPF {reserva.cpf}
+                        </span>
                       </div>
                     </td>
-                    <td className="py-3.5 px-4">
+                    <td className="py-3.5 px-3 min-w-44">
                       <div className="text-slate-800">{reserva.numero_chale}</div>
                       <div className="text-xs text-slate-500">
                         {reserva.quantidade_pessoas}{' '}
                         {reserva.quantidade_pessoas === 1 ? 'pessoa' : 'pessoas'}
                       </div>
                     </td>
-                    <td className="py-3.5 px-4 font-mono tabular-nums text-xs text-slate-700 whitespace-nowrap">
-                      <div>In: {formatarDataBR(reserva.data_checkin)}</div>
+                    <td className="py-3.5 px-3 font-mono tabular-nums text-xs text-slate-700 whitespace-nowrap">
+                      <div>{formatarDataBR(reserva.data_checkin)}</div>
                       <div className="text-slate-500">
-                        Out: {formatarDataBR(reserva.data_checkout)}
+                        até {formatarDataBR(reserva.data_checkout)}
                       </div>
                     </td>
-                    <td className="py-3.5 px-4 text-right font-mono tabular-nums whitespace-nowrap">
+                    <td className="py-3.5 px-3 text-right font-mono tabular-nums whitespace-nowrap">
                       <div className="text-slate-900">
                         {formatarMoedaBRL(reserva.valor_total_hospedagem)}
                       </div>
@@ -261,10 +285,10 @@ export const ReservasListPage: React.FC = () => {
                         Pago: {formatarMoedaBRL(reserva.valor_total_pago)}
                       </div>
                     </td>
-                    <td className="py-3.5 px-4 text-right font-mono tabular-nums font-semibold text-slate-900 whitespace-nowrap">
+                    <td className="py-3.5 px-3 text-right font-mono tabular-nums font-semibold text-slate-900 whitespace-nowrap">
                       {formatarMoedaBRL(reserva.valor_total_receber)}
                     </td>
-                    <td className="py-3.5 px-4 whitespace-nowrap">
+                    <td className="py-3.5 px-3 whitespace-nowrap">
                       {reserva.status === 'confirmada' ? (
                         <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-800">
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
@@ -278,30 +302,35 @@ export const ReservasListPage: React.FC = () => {
                       )}
                     </td>
                     <td className="py-3.5 px-5 text-right whitespace-nowrap">
-                      <div className="inline-flex items-center justify-end gap-2.5">
+                      <div className="inline-flex items-center justify-end gap-1.5">
                         <Link
                           to={`/reservas/${reserva.id}`}
                           className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-md transition-colors"
                           title="Ver detalhes completos"
+                          aria-label="Ver detalhes completos"
                         >
                           <Eye className="w-3.5 h-3.5" />
-                          <span>Detalhes</span>
+                          <span className="hidden 2xl:inline">Detalhes</span>
                         </Link>
                         <Link
                           to={`/reservas/${reserva.id}/voucher`}
                           className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-emerald-800 hover:text-emerald-950 bg-emerald-50 hover:bg-emerald-100 rounded-md transition-colors"
                           title="Visualizar e imprimir voucher"
+                          aria-label="Visualizar e imprimir voucher"
                         >
                           <FileText className="w-3.5 h-3.5" />
-                          <span>Voucher</span>
+                          <span className="hidden 2xl:inline">Voucher</span>
                         </Link>
                         {reserva.status === 'confirmada' && (
                           <button
                             type="button"
                             onClick={() => setReservaParaCancelar(reserva)}
-                            className="px-2.5 py-1.5 text-xs font-medium text-red-700 hover:text-red-900 hover:bg-red-50 rounded-md transition-colors cursor-pointer"
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-red-700 hover:text-red-900 hover:bg-red-50 rounded-md transition-colors cursor-pointer"
+                            title="Cancelar reserva"
+                            aria-label="Cancelar reserva"
                           >
-                            Cancelar
+                            <Ban className="w-3.5 h-3.5" />
+                            <span className="hidden 2xl:inline">Cancelar</span>
                           </button>
                         )}
                       </div>

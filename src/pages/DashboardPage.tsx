@@ -18,6 +18,7 @@ import {
   formatarMoedaBRL,
   obterCodigoCurtoReserva,
 } from '../utils/formatters';
+import { ReservaCard } from '../components/ReservaCard';
 
 export const DashboardPage: React.FC = () => {
   const [reservas, setReservas] = useState<Reserva[]>([]);
@@ -86,18 +87,20 @@ export const DashboardPage: React.FC = () => {
   const reservasRecentes = useMemo(() => reservas.slice(0, 5), [reservas]);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Cabeçalho da Página */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-4 sm:pb-5">
         <div className="space-y-1">
           <p className="text-xs font-medium text-slate-500">
-            Visão Consolidada da Recepção · Pousada Pinho Verde
+            Visão Consolidada da Recepção
+            <span className="hidden sm:inline"> · Pousada Pinho Verde</span>
           </p>
           <h1 className="font-display text-2xl sm:text-3xl font-semibold text-slate-900">
             Resumo Operacional e Reservas
           </h1>
         </div>
-        <div className="flex items-center gap-3">
+        {/* Em telas menores estas ações ficam na barra de navegação inferior */}
+        <div className="hidden lg:flex items-center gap-3">
           <Link
             to="/reservas"
             className="inline-flex items-center gap-2 px-4 py-2 text-xs font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg transition-colors whitespace-nowrap"
@@ -123,12 +126,12 @@ export const DashboardPage: React.FC = () => {
 
       {/* Grade de Indicadores (Números Tabulares, Elevação Única) */}
       <section aria-label="Indicadores Financeiros e de Ocupação">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-1.5">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="bg-white border border-slate-200 rounded-xl p-3.5 sm:p-5 space-y-1.5 min-w-0">
             <p className="text-xs font-medium text-slate-500">
               Reservas Confirmadas
             </p>
-            <p className="font-mono tabular-nums text-2xl font-semibold text-slate-900">
+            <p className="font-mono tabular-nums text-base sm:text-2xl font-semibold text-slate-900 break-words">
               {carregando ? '—' : resumo.qtdConfirmadas}
             </p>
             <p className="text-xs text-slate-500">
@@ -137,38 +140,38 @@ export const DashboardPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-1.5">
+          <div className="bg-white border border-slate-200 rounded-xl p-3.5 sm:p-5 space-y-1.5 min-w-0">
             <p className="text-xs font-medium text-slate-500">
               Total em Hospedagens Ativas
             </p>
-            <p className="font-mono tabular-nums text-2xl font-semibold text-slate-900">
+            <p className="font-mono tabular-nums text-base sm:text-2xl font-semibold text-slate-900 break-words">
               {carregando ? '—' : formatarMoedaBRL(resumo.totalHospedagem)}
             </p>
-            <p className="text-xs text-slate-500">
+            <p className="hidden sm:block text-xs text-slate-500">
               Soma bruta das reservas confirmadas
             </p>
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-1.5">
+          <div className="bg-white border border-slate-200 rounded-xl p-3.5 sm:p-5 space-y-1.5 min-w-0">
             <p className="text-xs font-medium text-slate-500">
               Total Já Recebido (Sinais/Quitados)
             </p>
-            <p className="font-mono tabular-nums text-2xl font-semibold text-emerald-800">
+            <p className="font-mono tabular-nums text-base sm:text-2xl font-semibold text-emerald-800 break-words">
               {carregando ? '—' : formatarMoedaBRL(resumo.totalPago)}
             </p>
-            <p className="text-xs text-slate-500">
+            <p className="hidden sm:block text-xs text-slate-500">
               Política padrão: 50% no ato da reserva
             </p>
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-1.5">
+          <div className="bg-white border border-slate-200 rounded-xl p-3.5 sm:p-5 space-y-1.5 min-w-0">
             <p className="text-xs font-medium text-slate-500">
               Saldo Pendente no Check-in
             </p>
-            <p className="font-mono tabular-nums text-2xl font-semibold text-amber-700">
+            <p className="font-mono tabular-nums text-base sm:text-2xl font-semibold text-amber-700 break-words">
               {carregando ? '—' : formatarMoedaBRL(resumo.totalReceber)}
             </p>
-            <p className="text-xs text-slate-500">
+            <p className="hidden sm:block text-xs text-slate-500">
               Calculado automaticamente pelo sistema
             </p>
           </div>
@@ -177,12 +180,12 @@ export const DashboardPage: React.FC = () => {
 
       {/* Tabela de Reservas Recentes */}
       <section className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between gap-4">
+        <div className="px-4 sm:px-6 py-4 border-b border-slate-200 flex items-center justify-between gap-4">
           <div>
             <h2 className="text-base font-semibold text-slate-900">
               Reservas Recentes
             </h2>
-            <p className="text-xs text-slate-500">
+            <p className="hidden sm:block text-xs text-slate-500">
               Últimos registros cadastrados pela recepção da pousada
             </p>
           </div>
@@ -214,14 +217,22 @@ export const DashboardPage: React.FC = () => {
             </p>
             <Link
               to="/reservas/nova"
-              className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-emerald-800 hover:bg-emerald-900 rounded-lg transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-3 sm:py-2 text-xs font-semibold text-white bg-emerald-800 hover:bg-emerald-900 rounded-lg transition-colors"
             >
               <CalendarPlus className="w-3.5 h-3.5" />
               <span>Cadastrar Primeira Reserva</span>
             </Link>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+          {/* Cartões em celular e tablet */}
+          <div className="lg:hidden p-3 grid grid-cols-1 md:grid-cols-2 gap-3 bg-slate-50/60">
+            {reservasRecentes.map((r) => (
+              <ReservaCard key={r.id} reserva={r} />
+            ))}
+          </div>
+
+          <div className="hidden lg:block overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50/70 text-xs font-semibold text-slate-600">
@@ -300,6 +311,7 @@ export const DashboardPage: React.FC = () => {
               </tbody>
             </table>
           </div>
+          </>
         )}
       </section>
     </div>

@@ -18,6 +18,28 @@
   }
 }
 
+/* Ajustes de toque para celular: fonte de 16px evita o zoom automático do iOS ao focar um campo
+   e a altura mínima de 44px garante área de toque confortável. */
+@media (max-width: 639px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
+  input,
+  select {
+    min-height: 44px;
+  }
+
+  /* Sem isso o campo de data do iOS ignora a largura da coluna e estoura o formulário */
+  input[type='date'] {
+    min-width: 0;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+}
+
 /* Margem zero remove o cabeçalho/rodapé do navegador (URL, data e título) na impressão */
 @page {
   margin: 0;

@@ -1,6 +1,7 @@
 /**
  * Layout principal do Sistema de Vouchers e Gestão de Reservas da Pousada Pinho Verde.
- * Segue o padrão Workspace Canvas (Sidebar + Top Header com Breadcrumb e Ações + Main Viewport).
+ * Desktop: Sidebar fixa + Top Header com Breadcrumb e Ação Primária.
+ * Celular/Tablet: Top Header compacto + barra de navegação fixa no rodapé.
  * Oculta automaticamente elementos de navegação durante a impressão do voucher (@media print).
  */
 import React from 'react';
@@ -24,16 +25,40 @@ export const Layout: React.FC = () => {
     navigate('/login');
   };
 
+  const path = location.pathname;
+  const isNovaReserva = path === '/reservas/nova';
+
   const obterTituloBreadcrumb = (): string => {
-    const path = location.pathname;
     if (path === '/' || path === '/dashboard') return 'Painel Geral';
     if (path === '/reservas') return 'Gestão de Reservas';
-    if (path === '/reservas/nova') return 'Nova Reserva';
+    if (isNovaReserva) return 'Nova Reserva';
     if (path.endsWith('/editar')) return 'Editar Reserva';
     if (path.endsWith('/voucher')) return 'Emissão de Voucher';
     if (path.startsWith('/reservas/')) return 'Detalhes da Reserva';
     return 'Sistema de Reservas';
   };
+
+  // Na barra inferior, "Reservas" permanece ativa também em detalhes, edição e voucher
+  const itensNavegacaoMovel = [
+    {
+      to: '/dashboard',
+      rotulo: 'Painel',
+      Icone: LayoutDashboard,
+      ativo: path === '/' || path === '/dashboard',
+    },
+    {
+      to: '/reservas',
+      rotulo: 'Reservas',
+      Icone: ListFilter,
+      ativo: path.startsWith('/reservas') && !isNovaReserva,
+    },
+    {
+      to: '/reservas/nova',
+      rotulo: 'Nova reserva',
+      Icone: CalendarPlus,
+      ativo: isNovaReserva,
+    },
+  ];
 
   return (
     <div className="min-h-screen flex bg-[#F8FAF9] text-slate-900">
@@ -115,9 +140,33 @@ export const Layout: React.FC = () => {
 
       {/* Conteúdo Principal */}
       <div className="flex-1 lg:pl-64 flex flex-col min-w-0">
-        {/* Top Bar Contract (3 zonas limpas) */}
-        <header className="no-print sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-slate-200 px-4 sm:px-8 py-3.5 flex items-center justify-between gap-4">
-          {/* Zona 1: Contexto / Breadcrumb */}
+        {/* Top Bar em Celular/Tablet: marca, título da tela e saída */}
+        <header className="no-print lg:hidden sticky top-0 z-20 bg-[#0F291E] text-white px-4 pt-[env(safe-area-inset-top)]">
+          <div className="h-14 flex items-center justify-between gap-3">
+            <Link to="/dashboard" className="flex items-center gap-2.5 min-w-0">
+              <Trees className="w-5 h-5 text-emerald-400 shrink-0" />
+              <span className="min-w-0">
+                <span className="block text-[11px] leading-tight text-emerald-200/80 truncate">
+                  Pousada Pinho Verde
+                </span>
+                <span className="block text-sm font-semibold leading-tight truncate">
+                  {obterTituloBreadcrumb()}
+                </span>
+              </span>
+            </Link>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="shrink-0 inline-flex items-center gap-1.5 h-10 px-3 text-xs font-medium text-emerald-100 bg-emerald-900/70 active:bg-emerald-800 rounded-lg whitespace-nowrap cursor-pointer"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Sair</span>
+            </button>
+          </div>
+        </header>
+
+        {/* Top Bar em Desktop (Breadcrumb + Ação Primária) */}
+        <header className="no-print hidden lg:flex sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-slate-200 px-8 py-3.5 items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-sm min-w-0">
             <Link
               to="/dashboard"
@@ -133,45 +182,53 @@ export const Layout: React.FC = () => {
             </span>
           </div>
 
-          {/* Zona 2: Links rápidos visíveis em telas menores */}
-          <nav className="flex lg:hidden items-center gap-4 text-sm font-medium text-slate-600">
-            <Link to="/dashboard" className="hover:text-slate-900 whitespace-nowrap">
-              Dashboard
-            </Link>
-            <Link to="/reservas" className="hover:text-slate-900 whitespace-nowrap">
-              Reservas
-            </Link>
-          </nav>
-
-          {/* Zona 3: Ação Primária */}
-          <div className="flex items-center gap-3 shrink-0">
-            <Link
-              to="/reservas/nova"
-              className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-emerald-800 hover:bg-emerald-900 rounded-lg transition-colors whitespace-nowrap"
-            >
-              <CalendarPlus className="w-3.5 h-3.5" />
-              <span>Nova Reserva</span>
-            </Link>
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="lg:hidden inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-slate-700 hover:text-slate-900 border border-slate-200 rounded-lg whitespace-nowrap cursor-pointer"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span>Sair</span>
-            </button>
-          </div>
+          <Link
+            to="/reservas/nova"
+            className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-emerald-800 hover:bg-emerald-900 rounded-lg transition-colors whitespace-nowrap shrink-0"
+          >
+            <CalendarPlus className="w-3.5 h-3.5" />
+            <span>Nova Reserva</span>
+          </Link>
         </header>
 
-        <main className="flex-1 px-4 sm:px-8 py-6 max-w-7xl w-full mx-auto">
+        {/* O espaço inferior extra em telas menores reserva a área da barra de navegação fixa */}
+        <main className="flex-1 px-4 sm:px-8 pt-5 sm:pt-6 pb-24 lg:pb-6 print:pb-6 max-w-7xl w-full mx-auto">
           <Outlet />
         </main>
 
-        <footer className="no-print border-t border-slate-200/80 px-4 sm:px-8 py-4 text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2">
+        <footer className="no-print hidden lg:flex border-t border-slate-200/80 px-8 py-4 text-xs text-slate-500 items-center justify-between gap-2">
           <span>Pousada Pinho Verde · Sistema de Vouchers e Gestão de Reservas</span>
           <span>Check-in às 15h · Check-out às 12h</span>
         </footer>
       </div>
+
+      {/* Barra de Navegação Inferior em Celular/Tablet */}
+      <nav
+        aria-label="Navegação principal"
+        className="no-print lg:hidden fixed bottom-0 inset-x-0 z-30 bg-white border-t border-slate-200 pb-[env(safe-area-inset-bottom)]"
+      >
+        <div className="grid grid-cols-3 max-w-lg mx-auto">
+          {itensNavegacaoMovel.map(({ to, rotulo, Icone, ativo }) => (
+            <Link
+              key={to}
+              to={to}
+              aria-current={ativo ? 'page' : undefined}
+              className={`flex flex-col items-center justify-center gap-1 h-16 text-[11px] font-medium transition-colors ${
+                ativo ? 'text-emerald-800' : 'text-slate-500 active:text-slate-900'
+              }`}
+            >
+              <span
+                className={`flex items-center justify-center w-12 h-7 rounded-full transition-colors ${
+                  ativo ? 'bg-emerald-100' : ''
+                }`}
+              >
+                <Icone className="w-5 h-5" />
+              </span>
+              <span>{rotulo}</span>
+            </Link>
+          ))}
+        </div>
+      </nav>
     </div>
   );
 };
