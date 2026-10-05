@@ -1,6 +1,3 @@
-"""
-Application Factory da API Flask — Sistema de Vouchers e Gestão de Reservas da Pousada Pinho Verde.
-"""
 from flask import Flask
 from flask_cors import CORS
 from app.config import Config
@@ -11,7 +8,6 @@ from app.utils.errors import register_error_handlers
 
 
 def create_app(testing: bool = False) -> Flask:
-    """Cria e configura a instância da aplicação Flask."""
     app = Flask(__name__)
     app.config.from_object(Config)
 

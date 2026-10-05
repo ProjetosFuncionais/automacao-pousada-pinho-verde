@@ -1,8 +1,3 @@
-"""
-Serviço responsável pela geração estruturada do Voucher oficial da Pousada Pinho Verde.
-Garante que o voucher somente seja emitido para reservas já salvas e inclui
-todas as políticas obrigatórias da pousada.
-"""
 from datetime import datetime, timezone
 from typing import Any
 from app.services.reserva_service import ReservaService
@@ -22,14 +17,9 @@ POLITICAS_POUSADA_PINHO_VERDE: list[str] = [
 
 
 class VoucherService:
-    """Gera o payload completo do voucher para exibição e impressão."""
 
     @classmethod
     def gerar_voucher(cls, reserva_id: str, emitido_por_nome: str) -> dict[str, Any]:
-        """
-        Busca a reserva persistida pelo ID, calcula a quantidade de diárias
-        e retorna os dados consolidados do voucher.
-        """
         reserva = ReservaService.obter_reserva_por_id(reserva_id)
 
         dt_checkin = parse_data_iso(reserva["data_checkin"])

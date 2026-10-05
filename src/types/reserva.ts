@@ -1,8 +1,3 @@
-/**
- * Tipos e interfaces TypeScript do Sistema de Vouchers e Gestão de Reservas
- * da Pousada Pinho Verde.
- */
-
 export type PerfilUsuario = 'admin' | 'recepcao';
 
 export type StatusReserva = 'confirmada' | 'cancelada';

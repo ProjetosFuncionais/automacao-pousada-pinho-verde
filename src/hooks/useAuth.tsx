@@ -1,7 +1,3 @@
-/**
- * Contexto e Hook de Autenticação da Pousada Pinho Verde.
- * Gerencia a sessão com Supabase Auth e valida o profile ativo na API Flask (/api/me).
- */
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { isSupabaseConfigured, supabase } from '../services/supabaseClient';
 import {
@@ -63,7 +59,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             if (mounted) setUser(profile);
           }
         } else {
-          // No modo preview sem Supabase externo, inicializa com o perfil salvo ou com a Recepção ativa
           let demoUser = obterSessaoDemoLocal();
           if (!demoUser) {
             demoUser = CONTAS_DEMO_POUSADA['admin@pousadapinhoverde.com.br'];
@@ -134,7 +129,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       return;
     }
 
-    // Autenticação local para ambiente de demonstração / preview
     if (password.length < 6) {
       throw new Error('A senha deve possuir no mínimo 6 caracteres.');
     }

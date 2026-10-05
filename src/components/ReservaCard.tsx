@@ -1,7 +1,3 @@
-/**
- * Cartão de reserva para celular e tablet.
- * Substitui a linha da tabela nas telas em que as colunas não cabem na largura disponível.
- */
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle2, Eye, FileText, XCircle } from 'lucide-react';
@@ -14,7 +10,6 @@ import {
 
 interface ReservaCardProps {
   reserva: Reserva;
-  /** Quando informado, exibe a ação de cancelamento para reservas confirmadas. */
   onCancelar?: (reserva: Reserva) => void;
 }
 

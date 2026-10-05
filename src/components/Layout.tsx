@@ -1,9 +1,3 @@
-/**
- * Layout principal do Sistema de Vouchers e Gestão de Reservas da Pousada Pinho Verde.
- * Desktop: Sidebar fixa + Top Header com Breadcrumb e Ação Primária.
- * Celular/Tablet: Top Header compacto + barra de navegação fixa no rodapé.
- * Oculta automaticamente elementos de navegação durante a impressão do voucher (@media print).
- */
 import React from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -38,7 +32,6 @@ export const Layout: React.FC = () => {
     return 'Sistema de Reservas';
   };
 
-  // Na barra inferior, "Reservas" permanece ativa também em detalhes, edição e voucher
   const itensNavegacaoMovel = [
     {
       to: '/dashboard',
@@ -62,7 +55,6 @@ export const Layout: React.FC = () => {
 
   return (
     <div className="min-h-screen flex bg-[#F8FAF9] text-slate-900">
-      {/* Sidebar Lateral Fixa em Desktop */}
       <aside className="no-print hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 bg-[#0F291E] text-slate-100 border-r border-emerald-950">
         <div className="px-6 py-5 border-b border-emerald-900/70 flex items-center gap-3">
           <Trees className="w-6 h-6 text-emerald-400 shrink-0" />
@@ -138,9 +130,7 @@ export const Layout: React.FC = () => {
         )}
       </aside>
 
-      {/* Conteúdo Principal */}
       <div className="flex-1 lg:pl-64 flex flex-col min-w-0">
-        {/* Top Bar em Celular/Tablet: marca, título da tela e saída */}
         <header className="no-print lg:hidden sticky top-0 z-20 bg-[#0F291E] text-white px-4 pt-[env(safe-area-inset-top)]">
           <div className="h-14 flex items-center justify-between gap-3">
             <Link to="/dashboard" className="flex items-center gap-2.5 min-w-0">
@@ -165,7 +155,6 @@ export const Layout: React.FC = () => {
           </div>
         </header>
 
-        {/* Top Bar em Desktop (Breadcrumb + Ação Primária) */}
         <header className="no-print hidden lg:flex sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-slate-200 px-8 py-3.5 items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-sm min-w-0">
             <Link
@@ -191,7 +180,6 @@ export const Layout: React.FC = () => {
           </Link>
         </header>
 
-        {/* O espaço inferior extra em telas menores reserva a área da barra de navegação fixa */}
         <main className="flex-1 px-4 sm:px-8 pt-5 sm:pt-6 pb-24 lg:pb-6 print:pb-6 max-w-7xl w-full mx-auto">
           <Outlet />
         </main>
@@ -202,7 +190,6 @@ export const Layout: React.FC = () => {
         </footer>
       </div>
 
-      {/* Barra de Navegação Inferior em Celular/Tablet */}
       <nav
         aria-label="Navegação principal"
         className="no-print lg:hidden fixed bottom-0 inset-x-0 z-30 bg-white border-t border-slate-200 pb-[env(safe-area-inset-bottom)]"

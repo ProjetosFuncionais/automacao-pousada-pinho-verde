@@ -1,7 +1,3 @@
-/**
- * Esquemas de validação com Zod para os formulários de Login e Reserva.
- * Repete no cliente todas as regras de negócio exigidas pela Pousada Pinho Verde.
- */
 import { z } from 'zod';
 import { extrairDigitos, validarCpfBrasileiro } from '../utils/formatters';
 

@@ -1,8 +1,3 @@
-/**
- * Tela 5: Detalhes Completos da Reserva.
- * Exibe dados do hóspede, acomodação, quadro financeiro de saldo e histórico de auditoria,
- * permitindo emitir o voucher oficial, editar ou cancelar a reserva sem excluir o registro.
- */
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
@@ -111,7 +106,6 @@ export const ReservaDetailPage: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      {/* Cabeçalho e Ações Principais */}
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 border-b border-slate-200 pb-4 sm:pb-5">
         <div className="space-y-1.5">
           <Link
@@ -192,7 +186,6 @@ export const ReservaDetailPage: React.FC = () => {
         </div>
       )}
 
-      {/* Resumo Financeiro da Reserva */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
         <div className="bg-white border border-slate-200 rounded-xl p-3.5 sm:p-5 space-y-1 min-w-0">
           <p className="text-xs text-slate-500">Valor Total da Hospedagem</p>
@@ -218,7 +211,6 @@ export const ReservaDetailPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Dados Detalhados em Painel Único */}
       <div className="bg-white border border-slate-200 rounded-xl divide-y divide-slate-200">
         <div className="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div className="space-y-3">

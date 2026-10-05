@@ -1,13 +1,9 @@
-"""
-Testes para validações de datas, quantidade de pessoas, CPF e regras de negócio.
-"""
 import pytest
 from app.schemas.reserva_schema import validar_payload_reserva
 from app.utils.errors import APIError
 
 
 def test_rejeita_checkout_anterior_ou_igual_checkin(payload_reserva_valida):
-    """A data de check-out deve ser estritamente posterior à data de check-in."""
     payload_igual = {
         **payload_reserva_valida,
         "data_checkin": "2026-12-10",
@@ -30,7 +26,6 @@ def test_rejeita_checkout_anterior_ou_igual_checkin(payload_reserva_valida):
 
 
 def test_rejeita_quantidade_pessoas_zero_ou_negativa(payload_reserva_valida):
-    """A quantidade de pessoas deve ser maior que zero."""
     for qtd in (0, -2):
         payload = {**payload_reserva_valida, "quantidade_pessoas": qtd}
         with pytest.raises(APIError) as exc_info:
@@ -40,7 +35,6 @@ def test_rejeita_quantidade_pessoas_zero_ou_negativa(payload_reserva_valida):
 
 
 def test_rejeita_cpf_invalido(payload_reserva_valida):
-    """Deve rejeitar CPF com dígitos verificadores incorretos ou repetidos."""
     payload = {**payload_reserva_valida, "cpf": "111.111.111-11"}
     with pytest.raises(APIError) as exc_info:
         validar_payload_reserva(payload)

@@ -1,7 +1,3 @@
-"""
-Validação e normalização do payload de criação e atualização de reservas.
-Repete todas as validações críticas do frontend no servidor Flask.
-"""
 from typing import Any
 from decimal import Decimal
 from app.utils.errors import APIError
@@ -17,11 +13,6 @@ from app.utils.validators import (
 
 
 def validar_payload_reserva(payload: Any) -> dict[str, Any]:
-    """
-    Valida os campos obrigatórios e regras de negócio de uma reserva.
-    Observação importante: o campo valor_total_receber NUNCA é aceito manualmente
-    do cliente, sendo calculado automaticamente pelo sistema e pelo PostgreSQL.
-    """
     if not isinstance(payload, dict):
         raise APIError(
             erro="requisicao_invalida",
@@ -31,7 +22,6 @@ def validar_payload_reserva(payload: Any) -> dict[str, Any]:
 
     erros_campos: dict[str, str] = {}
 
-    # 1. Nome completo
     nome_completo = str(payload.get("nome_completo") or "").strip()
     if len(nome_completo) < 3:
         erros_campos["nome_completo"] = (
@@ -42,14 +32,12 @@ def validar_payload_reserva(payload: Any) -> dict[str, Any]:
             "O nome completo não pode ultrapassar 150 caracteres."
         )
 
-    # 2. CPF
     cpf_bruto = str(payload.get("cpf") or "").strip()
     if not cpf_bruto:
         erros_campos["cpf"] = "O CPF do hóspede é obrigatório."
     elif not validar_cpf(cpf_bruto):
         erros_campos["cpf"] = "Informe um CPF válido (ex: 000.000.000-00)."
 
-    # 3. WhatsApp
     whatsapp_bruto = str(payload.get("whatsapp") or "").strip()
     if not whatsapp_bruto:
         erros_campos["whatsapp"] = "O número de WhatsApp é obrigatório."
@@ -58,14 +46,12 @@ def validar_payload_reserva(payload: Any) -> dict[str, Any]:
             "Informe um telefone/WhatsApp válido com DDD (10 ou 11 dígitos)."
         )
 
-    # 4. Endereço
     endereco = str(payload.get("endereco") or "").strip()
     if len(endereco) < 5:
         erros_campos["endereco"] = (
             "Informe o endereço completo do hóspede (mínimo de 5 caracteres)."
         )
 
-    # 5. Número / identificação do chalé
     numero_chale = str(payload.get("numero_chale") or "").strip()
     if not numero_chale:
         erros_campos["numero_chale"] = "Informe o número ou identificação do chalé."
@@ -74,7 +60,6 @@ def validar_payload_reserva(payload: Any) -> dict[str, Any]:
             "A identificação do chalé deve ter no máximo 50 caracteres."
         )
 
-    # 6. Quantidade de pessoas (> 0)
     qtd_bruta = payload.get("quantidade_pessoas")
     quantidade_pessoas: int | None = None
     if isinstance(qtd_bruta, bool) or qtd_bruta is None or str(qtd_bruta).strip() == "":
@@ -91,7 +76,6 @@ def validar_payload_reserva(payload: Any) -> dict[str, Any]:
                 "A quantidade de pessoas deve ser um número inteiro válido."
             )
 
-    # 7. Datas de Check-in e Check-out (checkout > checkin)
     data_checkin = parse_data_iso(payload.get("data_checkin"))
     data_checkout = parse_data_iso(payload.get("data_checkout"))
 
@@ -109,7 +93,6 @@ def validar_payload_reserva(payload: Any) -> dict[str, Any]:
             "A data de check-out deve ser posterior à data de check-in."
         )
 
-    # 8. Valores financeiros (não negativos e pago <= total)
     valor_hospedagem = parse_decimal_monetario(payload.get("valor_total_hospedagem"))
     valor_pago = parse_decimal_monetario(payload.get("valor_total_pago", 0))
 
@@ -138,7 +121,6 @@ def validar_payload_reserva(payload: Any) -> dict[str, Any]:
             "O valor pago não pode ser maior que o valor total da hospedagem."
         )
 
-    # 9. Descrição opcional
     descricao_bruta = payload.get("descricao")
     descricao = (
         str(descricao_bruta).strip() if descricao_bruta is not None else None

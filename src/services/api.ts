@@ -1,9 +1,3 @@
-/**
- * Camada de comunicação com a API REST Flask.
- * Envia automaticamente o cabeçalho Authorization: Bearer <TOKEN> obtido do Supabase Auth.
- * Inclui também camada de persistência local espelhada no contrato exato da API Flask
- * quando executado em ambiente de preview sem servidor Flask/Supabase externo ativo.
- */
 import { isSupabaseConfigured, supabase } from './supabaseClient';
 import {
   ApiErrorResponse,
@@ -309,9 +303,6 @@ function validarPayloadSimulandoBackend(payload: ReservaPayload): ReservaPayload
 }
 
 export const apiService = {
-  /**
-   * GET /api/me
-   */
   async getMe(): Promise<Profile> {
     if (isSupabaseConfigured) {
       return requestFlaskApi<Profile>('/me');
@@ -334,9 +325,6 @@ export const apiService = {
     return profile;
   },
 
-  /**
-   * GET /api/reservas?busca=&status=
-   */
   async listarReservas(filtros?: {
     busca?: string;
     status?: StatusReserva | 'todas';
@@ -392,9 +380,6 @@ export const apiService = {
     });
   },
 
-  /**
-   * GET /api/reservas/<id>
-   */
   async obterReservaPorId(id: string): Promise<Reserva> {
     if (isSupabaseConfigured) {
       return requestFlaskApi<Reserva>(`/reservas/${encodeURIComponent(id)}`);
@@ -413,9 +398,6 @@ export const apiService = {
     return encontrada;
   },
 
-  /**
-   * POST /api/reservas
-   */
   async criarReserva(payload: ReservaPayload): Promise<Reserva> {
     if (isSupabaseConfigured) {
       return requestFlaskApi<Reserva>('/reservas', {
@@ -460,9 +442,6 @@ export const apiService = {
     return novaReserva;
   },
 
-  /**
-   * PUT /api/reservas/<id>
-   */
   async atualizarReserva(id: string, payload: ReservaPayload): Promise<Reserva> {
     if (isSupabaseConfigured) {
       return requestFlaskApi<Reserva>(`/reservas/${encodeURIComponent(id)}`, {
@@ -518,9 +497,6 @@ export const apiService = {
     return atualizada;
   },
 
-  /**
-   * PATCH /api/reservas/<id>/cancelar
-   */
   async cancelarReserva(id: string): Promise<Reserva> {
     if (isSupabaseConfigured) {
       return requestFlaskApi<Reserva>(
@@ -561,9 +537,6 @@ export const apiService = {
     return cancelada;
   },
 
-  /**
-   * GET /api/reservas/<id>/voucher
-   */
   async obterVoucher(id: string): Promise<VoucherData> {
     if (isSupabaseConfigured) {
       return requestFlaskApi<VoucherData>(

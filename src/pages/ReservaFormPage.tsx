@@ -1,12 +1,3 @@
-/**
- * Tela 4: Formulário de Cadastro e Edição de Reserva.
- * Contém:
- * - Máscara de CPF (000.000.000-00)
- * - Máscara de WhatsApp ((00) 00000-0000)
- * - Formatação monetária em Reais (R$)
- * - Cálculo do saldo a receber em tempo real (somente leitura)
- * - Validações com React Hook Form + Zod + tratamento de erros por campo da API Flask
- */
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -43,7 +34,6 @@ export const ReservaFormPage: React.FC = () => {
   const [erroGeral, setErroGeral] = useState<string | null>(null);
   const [mensagemSucesso, setMensagemSucesso] = useState<string | null>(null);
 
-  // Estados visuais para exibição formatada em Reais (R$) nos campos de moeda
   const [textoValorTotal, setTextoValorTotal] = useState<string>('R$ 0,00');
   const [textoValorPago, setTextoValorPago] = useState<string>('R$ 0,00');
 
@@ -77,7 +67,6 @@ export const ReservaFormPage: React.FC = () => {
     },
   });
 
-  // Observa valores financeiros e datas em tempo real para calcular o saldo e diárias
   const valorTotalAssistido = watch('valor_total_hospedagem') || 0;
   const valorPagoAssistido = watch('valor_total_pago') || 0;
   const dataCheckinAssistida = watch('data_checkin');
@@ -217,7 +206,6 @@ export const ReservaFormPage: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      {/* Cabeçalho */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4 sm:pb-5">
         <div className="space-y-1">
           <Link
@@ -258,7 +246,6 @@ export const ReservaFormPage: React.FC = () => {
         noValidate
         className="bg-white border border-slate-200 rounded-xl p-4 sm:p-8 space-y-7 sm:space-y-8"
       >
-        {/* Seção 1: Dados do Hóspede */}
         <div className="space-y-4">
           <div className="border-b border-slate-100 pb-2">
             <h2 className="text-base font-semibold text-slate-900">
@@ -360,7 +347,6 @@ export const ReservaFormPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Seção 2: Acomodação e Período */}
         <div className="space-y-4">
           <div className="border-b border-slate-100 pb-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
             <div>
@@ -471,7 +457,6 @@ export const ReservaFormPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Seção 3: Valores Financeiros e Cálculo Automático de Saldo */}
         <div className="space-y-4">
           <div className="border-b border-slate-100 pb-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
@@ -560,7 +545,6 @@ export const ReservaFormPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Seção 4: Observações / Descrição */}
         <div className="space-y-2">
           <label
             htmlFor="descricao"
@@ -582,7 +566,6 @@ export const ReservaFormPage: React.FC = () => {
           )}
         </div>
 
-        {/* Rodapé de Ações */}
         <div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <p className="text-xs text-slate-500">
             O voucher oficial poderá ser visualizado e impresso imediatamente após salvar a reserva.

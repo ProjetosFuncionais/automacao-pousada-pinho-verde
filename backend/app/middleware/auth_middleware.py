@@ -1,8 +1,3 @@
-"""
-Middleware / Decorator de autenticação e autorização para rotas protegidas do Flask.
-Valida o token Bearer no Supabase Auth e garante que o usuário possua profile ativo.
-Nunca registra tokens ou segredos nos logs.
-"""
 from functools import wraps
 from typing import Any, Callable
 from flask import g, request
@@ -12,7 +7,6 @@ from app.utils.errors import APIError
 
 
 def extrair_bearer_token(auth_header: str | None) -> str:
-    """Extrai o token JWT do cabeçalho Authorization: Bearer <TOKEN>."""
     if not auth_header or not isinstance(auth_header, str):
         raise APIError(
             erro="nao_autenticado",
@@ -32,7 +26,6 @@ def extrair_bearer_token(auth_header: str | None) -> str:
 
 
 def verificar_token_supabase(token: str) -> dict[str, Any]:
-    """Valida o access_token junto ao Supabase Auth e retorna os dados básicos do usuário."""
     try:
         auth_client = get_supabase_auth()
         user_response = auth_client.auth.get_user(token)
@@ -58,13 +51,6 @@ def verificar_token_supabase(token: str) -> dict[str, Any]:
 
 
 def require_auth(f: Callable) -> Callable:
-    """
-    Decorator para proteger endpoints da API Flask.
-    1. Extrai o Bearer token do header Authorization.
-    2. Valida o token no Supabase Auth.
-    3. Verifica se o usuário existe em public.profiles e está com ativo = True.
-    4. Armazena os dados do usuário autenticado em flask.g.current_user.
-    """
 
     @wraps(f)
     def decorated(*args: Any, **kwargs: Any):

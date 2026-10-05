@@ -1,19 +1,9 @@
-"""
-Padronização de erros e exceções HTTP da API Flask.
-Todas as respostas de erro seguem o formato:
-{
-  "erro": "codigo_do_erro",
-  "mensagem": "Mensagem compreensível",
-  "campos": {}
-}
-"""
 from typing import Any, Optional
 from flask import Flask, jsonify
 from werkzeug.exceptions import HTTPException
 
 
 class APIError(Exception):
-    """Exceção de domínio e aplicação com código HTTP e dicionário de campos."""
 
     def __init__(
         self,
@@ -37,7 +27,6 @@ class APIError(Exception):
 
 
 def register_error_handlers(app: Flask) -> None:
-    """Registra os handlers globais para garantir respostas JSON padronizadas."""
 
     @app.errorhandler(APIError)
     def handle_api_error(exc: APIError):
@@ -96,7 +85,6 @@ def register_error_handlers(app: Flask) -> None:
                 exc.code or 500,
             )
 
-        # Log seguro sem jamais incluir tokens ou segredos
         app.logger.error("Erro interno inesperado na API: %s", type(exc).__name__)
         return (
             jsonify(

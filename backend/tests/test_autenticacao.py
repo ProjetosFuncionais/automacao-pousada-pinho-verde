@@ -1,11 +1,7 @@
-"""
-Testes de autenticação, validação de Bearer Token e verificação de profile ativo.
-"""
 from unittest.mock import patch
 
 
 def test_health_check_publico(client):
-    """O endpoint /api/health deve responder 200 sem exigir autenticação."""
     resp = client.get("/api/health")
     assert resp.status_code == 200
     dados = resp.get_json()
@@ -13,7 +9,6 @@ def test_health_check_publico(client):
 
 
 def test_bloqueia_requisicao_sem_token(client):
-    """Rotas protegidas devem retornar 401 quando o cabeçalho Authorization está ausente."""
     resp = client.get("/api/reservas")
     assert resp.status_code == 401
     dados = resp.get_json()
@@ -21,7 +16,6 @@ def test_bloqueia_requisicao_sem_token(client):
 
 
 def test_bloqueia_usuario_com_profile_inativo(client):
-    """Usuários autenticados porém com ativo=False em profiles devem receber 403."""
     with (
         patch(
             "app.middleware.auth_middleware.verificar_token_supabase",
@@ -50,7 +44,6 @@ def test_bloqueia_usuario_com_profile_inativo(client):
 
 
 def test_libera_usuario_autenticado_com_profile_ativo(client):
-    """Usuários autenticados com profile ativo devem acessar /api/me com status 200."""
     with (
         patch(
             "app.middleware.auth_middleware.verificar_token_supabase",

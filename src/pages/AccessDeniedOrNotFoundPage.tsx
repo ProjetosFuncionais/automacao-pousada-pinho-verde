@@ -1,6 +1,3 @@
-/**
- * Tela 7: Página de Acesso Negado (403) ou Recurso Não Encontrado (404).
- */
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ShieldAlert, Compass, ArrowLeft } from 'lucide-react';

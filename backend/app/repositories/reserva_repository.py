@@ -1,13 +1,8 @@
-"""
-Repositório de acesso à tabela public.reservas no Supabase PostgreSQL.
-Operações são realizadas pelo backend Flask usando SUPABASE_SERVICE_ROLE_KEY.
-"""
 from typing import Any, Optional
 from app.extensions import get_supabase_admin
 
 
 class ReservaRepository:
-    """Encapsula consultas e persistência na tabela public.reservas."""
 
     TABLE_NAME = "reservas"
     COLUMNS = (
@@ -23,10 +18,6 @@ class ReservaRepository:
         busca: Optional[str] = None,
         status: Optional[str] = None,
     ) -> list[dict[str, Any]]:
-        """
-        Lista reservas ordenadas por data de criação decrescente.
-        Permite filtrar por status e termo de busca (nome, CPF, WhatsApp, chalé ou código).
-        """
         client = get_supabase_admin()
         query = (
             client.table(cls.TABLE_NAME)
@@ -75,7 +66,6 @@ class ReservaRepository:
 
     @classmethod
     def buscar_por_id(cls, reserva_id: str) -> Optional[dict[str, Any]]:
-        """Busca uma reserva pelo seu UUID."""
         client = get_supabase_admin()
         response = (
             client.table(cls.TABLE_NAME)
@@ -89,10 +79,6 @@ class ReservaRepository:
 
     @classmethod
     def criar(cls, dados_insercao: dict[str, Any]) -> dict[str, Any]:
-        """
-        Insere uma nova reserva no banco de dados.
-        Remove valor_total_receber do dicionário de inserção pois a coluna é GENERATED ALWAYS no PostgreSQL.
-        """
         payload_db = {
             k: v
             for k, v in dados_insercao.items()
@@ -105,10 +91,6 @@ class ReservaRepository:
 
     @classmethod
     def atualizar(cls, reserva_id: str, dados_atualizacao: dict[str, Any]) -> dict[str, Any]:
-        """
-        Atualiza os dados de uma reserva existente.
-        Não envia valor_total_receber pois o PostgreSQL recalcula automaticamente.
-        """
         payload_db = {
             k: v
             for k, v in dados_atualizacao.items()
@@ -133,7 +115,6 @@ class ReservaRepository:
 
     @classmethod
     def atualizar_status(cls, reserva_id: str, novo_status: str) -> dict[str, Any]:
-        """Atualiza exclusivamente o status da reserva (ex.: para 'cancelada')."""
         client = get_supabase_admin()
         response = (
             client.table(cls.TABLE_NAME)

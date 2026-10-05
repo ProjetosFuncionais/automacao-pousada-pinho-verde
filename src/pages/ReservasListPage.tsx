@@ -1,7 +1,3 @@
-/**
- * Tela 3: Lista de Reservas com busca por nome, CPF, telefone, chalé ou código,
- * filtro por status, visualização de detalhes, emissão de voucher e cancelamento.
- */
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -84,7 +80,6 @@ export const ReservasListPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Cabeçalho */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-4 sm:pb-5">
         <div className="space-y-1">
           <p className="text-xs font-medium text-slate-500">
@@ -95,7 +90,6 @@ export const ReservasListPage: React.FC = () => {
             Lista de Reservas
           </h1>
         </div>
-        {/* Em telas menores a ação "Nova reserva" fica na barra de navegação inferior */}
         <Link
           to="/reservas/nova"
           className="hidden lg:inline-flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-emerald-800 hover:bg-emerald-900 rounded-lg transition-colors whitespace-nowrap"
@@ -105,7 +99,6 @@ export const ReservasListPage: React.FC = () => {
         </Link>
       </div>
 
-      {/* Mensagens de feedback */}
       {mensagemSucesso && (
         <div
           role="status"
@@ -132,7 +125,6 @@ export const ReservasListPage: React.FC = () => {
         </div>
       )}
 
-      {/* Barra de Busca e Filtro de Status (Segmented Control Interativo) */}
       <div className="bg-white border border-slate-200 rounded-xl p-3 sm:p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 sm:gap-4">
         <div className="relative flex-1">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -157,7 +149,6 @@ export const ReservasListPage: React.FC = () => {
           )}
         </div>
 
-        {/* Controle Segmentado de Status */}
         <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-lg shrink-0">
           {(
             [
@@ -182,7 +173,6 @@ export const ReservasListPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Resultados em Cartões (celular e tablet) */}
       {!carregando && reservas.length > 0 && (
         <div className="lg:hidden grid grid-cols-1 md:grid-cols-2 gap-3">
           {reservas.map((reserva) => (
@@ -195,7 +185,6 @@ export const ReservasListPage: React.FC = () => {
         </div>
       )}
 
-      {/* Tabela de Resultados (desktop) e estados de carregamento / lista vazia */}
       <div
         className={`bg-white border border-slate-200 rounded-xl overflow-hidden ${
           !carregando && reservas.length > 0 ? 'hidden lg:block' : ''

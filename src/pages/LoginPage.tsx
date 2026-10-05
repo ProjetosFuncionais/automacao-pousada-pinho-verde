@@ -1,7 +1,3 @@
-/**
- * Tela 1: Login de Colaboradores da Pousada Pinho Verde.
- * Utiliza React Hook Form + Zod e autentica via Supabase Auth.
- */
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -50,7 +46,6 @@ export const LoginPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-[#F8FAF9]">
-      {/* Coluna Institucional */}
       <div className="lg:w-5/12 bg-[#0F291E] text-white px-6 pt-[max(1.5rem,env(safe-area-inset-top))] pb-6 lg:p-14 flex flex-col justify-between">
         <div className="flex items-center gap-3">
           <Trees className="w-7 h-7 text-emerald-400" />
@@ -78,7 +73,6 @@ export const LoginPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Coluna do Formulário de Autenticação */}
       <div className="flex-1 flex items-start lg:items-center justify-center p-4 sm:p-12">
         <div className="w-full max-w-md bg-white border border-slate-200 rounded-xl p-5 sm:p-8 space-y-6">
           <div className="space-y-1.5">

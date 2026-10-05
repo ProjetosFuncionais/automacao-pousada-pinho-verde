@@ -1,8 +1,3 @@
-/**
- * Tela 6: Visualização e Impressão do Voucher Oficial da Pousada Pinho Verde.
- * Permite imprimir diretamente ou salvar como PDF pelo navegador (window.print()),
- * exibindo todos os dados da reserva, cálculo do saldo e as 9 políticas obrigatórias.
- */
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, CheckCircle2, Printer, Trees, XCircle } from 'lucide-react';
@@ -87,7 +82,6 @@ export const VoucherPage: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      {/* Barra de Ações (Oculta na impressão via classe .no-print) */}
       <div className="no-print flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 bg-white border border-slate-200 rounded-xl p-3 sm:p-4">
         <div className="flex items-center gap-3">
           <Link
@@ -111,9 +105,7 @@ export const VoucherPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Folha Oficial do Voucher */}
       <article className="print-only-container bg-white border border-slate-300 rounded-xl p-5 sm:p-10 space-y-7 sm:space-y-8 text-slate-900">
-        {/* Cabeçalho do Voucher */}
         <header className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 sm:gap-6 border-b border-slate-300 pb-5 sm:pb-6">
           <div className="space-y-1.5">
             <div className="flex items-center gap-2.5">
@@ -148,7 +140,6 @@ export const VoucherPage: React.FC = () => {
           </div>
         </header>
 
-        {/* Bloco 1: Identificação do Hóspede */}
         <section className="space-y-3">
           <h2 className="text-xs font-semibold text-slate-500 border-b border-slate-200 pb-1.5">
             01. Dados do Hóspede Titular
@@ -179,7 +170,6 @@ export const VoucherPage: React.FC = () => {
           </div>
         </section>
 
-        {/* Bloco 2: Acomodação e Datas */}
         <section className="space-y-3">
           <h2 className="text-xs font-semibold text-slate-500 border-b border-slate-200 pb-1.5">
             02. Detalhes da Acomodação e Período
@@ -229,7 +219,6 @@ export const VoucherPage: React.FC = () => {
           )}
         </section>
 
-        {/* Bloco 3: Demonstrativo Financeiro */}
         <section className="space-y-3">
           <h2 className="text-xs font-semibold text-slate-500 border-b border-slate-200 pb-1.5">
             03. Demonstrativo Financeiro da Hospedagem
@@ -262,7 +251,6 @@ export const VoucherPage: React.FC = () => {
           </div>
         </section>
 
-        {/* Bloco 4: Políticas Obrigatórias da Pousada Pinho Verde */}
         <section className="space-y-3">
           <h2 className="text-xs font-semibold text-slate-500 border-b border-slate-200 pb-1.5">
             04. Políticas de Hospedagem, Cancelamento e Pagamento — Pousada Pinho Verde
@@ -274,7 +262,6 @@ export const VoucherPage: React.FC = () => {
           </ul>
         </section>
 
-        {/* Rodapé de Autenticidade do Voucher (apenas na tela, oculto na impressão) */}
         <footer className="no-print pt-6 border-t border-slate-300 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-500 font-mono tabular-nums">
           <span className="break-all sm:break-normal">ID da Reserva: {reserva.id}</span>
           <span>

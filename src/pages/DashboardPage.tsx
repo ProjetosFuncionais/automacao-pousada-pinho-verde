@@ -1,6 +1,3 @@
-/**
- * Tela 2: Dashboard com resumo operacional, indicadores financeiros e reservas recentes.
- */
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -88,7 +85,6 @@ export const DashboardPage: React.FC = () => {
 
   return (
     <div className="space-y-6 sm:space-y-8">
-      {/* Cabeçalho da Página */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-4 sm:pb-5">
         <div className="space-y-1">
           <p className="text-xs font-medium text-slate-500">
@@ -99,7 +95,6 @@ export const DashboardPage: React.FC = () => {
             Resumo Operacional e Reservas
           </h1>
         </div>
-        {/* Em telas menores estas ações ficam na barra de navegação inferior */}
         <div className="hidden lg:flex items-center gap-3">
           <Link
             to="/reservas"
@@ -124,7 +119,6 @@ export const DashboardPage: React.FC = () => {
         </div>
       )}
 
-      {/* Grade de Indicadores (Números Tabulares, Elevação Única) */}
       <section aria-label="Indicadores Financeiros e de Ocupação">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <div className="bg-white border border-slate-200 rounded-xl p-3.5 sm:p-5 space-y-1.5 min-w-0">
@@ -178,7 +172,6 @@ export const DashboardPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Tabela de Reservas Recentes */}
       <section className="bg-white border border-slate-200 rounded-xl overflow-hidden">
         <div className="px-4 sm:px-6 py-4 border-b border-slate-200 flex items-center justify-between gap-4">
           <div>
@@ -225,7 +218,6 @@ export const DashboardPage: React.FC = () => {
           </div>
         ) : (
           <>
-          {/* Cartões em celular e tablet */}
           <div className="lg:hidden p-3 grid grid-cols-1 md:grid-cols-2 gap-3 bg-slate-50/60">
             {reservasRecentes.map((r) => (
               <ReservaCard key={r.id} reserva={r} />

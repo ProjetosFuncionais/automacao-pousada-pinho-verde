@@ -1,6 +1,3 @@
-"""
-Ponto de entrada principal para execução do servidor Flask da Pousada Pinho Verde.
-"""
 import os
 from app import create_app
 

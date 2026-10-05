@@ -1,7 +1,3 @@
-/**
- * Modal de confirmação para cancelamento de reserva.
- * Deixa explícito que o cancelamento mantém o registro histórico para auditoria.
- */
 import React from 'react';
 import { AlertTriangle, X } from 'lucide-react';
 
