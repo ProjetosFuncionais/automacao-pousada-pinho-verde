@@ -118,21 +118,6 @@ Centralizar a operação diária de reservas da Pousada Pinho Verde garantindo:
 
 ---
 
-## 4. Como rodar
-
-```bash
-# Backend (porta 5001)
-cd backend
-python -m venv .venv && .venv/bin/pip install -r requirements.txt
-cp .env.example .env                 # preencher DATABASE_URL (Neon) e JWT_SECRET
-.venv/bin/python manage.py init-db   # cria as tabelas
-.venv/bin/python manage.py criar-usuario admin@pousadapinhoverde.com.br "Nome" --perfil admin
-.venv/bin/python run.py
-
-# Frontend (porta 3000), na raiz
-npm install
-npm run dev
-```
 
 Detalhes de publicação na Vercel e manutenção de usuários: [docs/DOCUMENTACAO_PROJETO.md](docs/DOCUMENTACAO_PROJETO.md).
 
