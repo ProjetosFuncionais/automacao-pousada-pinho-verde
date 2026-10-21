@@ -172,7 +172,7 @@ export const ReservaFormPage: React.FC = () => {
       } else {
         const criada = await apiService.criarReserva(dados);
         setMensagemSucesso(
-          'Reserva cadastrada com sucesso! Redirecionando para os detalhes e emissão do voucher...'
+          'Reserva salva. Abrindo os detalhes...'
         );
         navigate(`/reservas/${criada.id}`);
       }
@@ -216,7 +216,7 @@ export const ReservaFormPage: React.FC = () => {
             <span>Voltar para a lista de reservas</span>
           </Link>
           <h1 className="font-display text-2xl sm:text-3xl font-semibold text-slate-900">
-            {isEdicao ? 'Editar Reserva' : 'Cadastrar Nova Reserva'}
+            {isEdicao ? 'Editar reserva' : 'Nova reserva'}
           </h1>
         </div>
       </div>
@@ -249,10 +249,10 @@ export const ReservaFormPage: React.FC = () => {
         <div className="space-y-4">
           <div className="border-b border-slate-100 pb-2">
             <h2 className="text-base font-semibold text-slate-900">
-              01. Identificação do Hóspede Titular
+              Hóspede
             </h2>
             <p className="text-xs text-slate-500">
-              Campos obrigatórios para emissão do voucher nominal da Pousada Pinho Verde.
+              Esses dados aparecem no voucher.
             </p>
           </div>
 
@@ -262,7 +262,7 @@ export const ReservaFormPage: React.FC = () => {
                 htmlFor="nome_completo"
                 className="block text-xs font-semibold text-slate-700 mb-1.5"
               >
-                Nome Completo *
+                Nome completo *
               </label>
               <input
                 id="nome_completo"
@@ -294,7 +294,7 @@ export const ReservaFormPage: React.FC = () => {
                 placeholder="000.000.000-00"
                 {...register('cpf')}
                 onChange={handleCpfChange}
-                className="w-full px-3.5 py-2 text-sm font-mono tabular-nums border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:border-emerald-700"
+                className="w-full px-3.5 py-2 text-sm tabular-nums border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:border-emerald-700"
               />
               {errors.cpf && (
                 <p className="mt-1 text-xs text-red-600">{errors.cpf.message}</p>
@@ -315,7 +315,7 @@ export const ReservaFormPage: React.FC = () => {
                 placeholder="(35) 99999-9999"
                 {...register('whatsapp')}
                 onChange={handleWhatsappChange}
-                className="w-full px-3.5 py-2 text-sm font-mono tabular-nums border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:border-emerald-700"
+                className="w-full px-3.5 py-2 text-sm tabular-nums border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:border-emerald-700"
               />
               {errors.whatsapp && (
                 <p className="mt-1 text-xs text-red-600">
@@ -329,7 +329,7 @@ export const ReservaFormPage: React.FC = () => {
                 htmlFor="endereco"
                 className="block text-xs font-semibold text-slate-700 mb-1.5"
               >
-                Endereço Completo *
+                Endereço *
               </label>
               <input
                 id="endereco"
@@ -351,14 +351,14 @@ export const ReservaFormPage: React.FC = () => {
           <div className="border-b border-slate-100 pb-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
             <div>
               <h2 className="text-base font-semibold text-slate-900">
-                02. Acomodação e Período de Estadia
+                Chalé e período
               </h2>
               <p className="text-xs text-slate-500">
                 Check-in às 15h · Check-out às 12h.
               </p>
             </div>
             {diariasCalculadas > 0 && (
-              <span className="font-mono tabular-nums text-xs font-semibold text-emerald-800">
+              <span className="tabular-nums text-xs font-semibold text-emerald-800">
                 {diariasCalculadas}{' '}
                 {diariasCalculadas === 1 ? 'diária calculada' : 'diárias calculadas'}
               </span>
@@ -371,7 +371,7 @@ export const ReservaFormPage: React.FC = () => {
                 htmlFor="numero_chale"
                 className="block text-xs font-semibold text-slate-700 mb-1.5"
               >
-                Número / Nome do Chalé *
+                Chalé *
               </label>
               <input
                 id="numero_chale"
@@ -397,7 +397,7 @@ export const ReservaFormPage: React.FC = () => {
                 htmlFor="quantidade_pessoas"
                 className="block text-xs font-semibold text-slate-700 mb-1.5"
               >
-                Nº de Pessoas *
+                Pessoas *
               </label>
               <input
                 id="quantidade_pessoas"
@@ -406,7 +406,7 @@ export const ReservaFormPage: React.FC = () => {
                 min={1}
                 step={1}
                 {...register('quantidade_pessoas', { valueAsNumber: true })}
-                className="w-full px-3.5 py-2 text-sm font-mono tabular-nums border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:border-emerald-700"
+                className="w-full px-3.5 py-2 text-sm tabular-nums border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:border-emerald-700"
               />
               {errors.quantidade_pessoas && (
                 <p className="mt-1 text-xs text-red-600">
@@ -426,7 +426,7 @@ export const ReservaFormPage: React.FC = () => {
                 id="data_checkin"
                 type="date"
                 {...register('data_checkin')}
-                className="w-full px-3 py-2 text-sm font-mono tabular-nums border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:border-emerald-700"
+                className="w-full px-3 py-2 text-sm tabular-nums border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:border-emerald-700"
               />
               {errors.data_checkin && (
                 <p className="mt-1 text-xs text-red-600">
@@ -446,7 +446,7 @@ export const ReservaFormPage: React.FC = () => {
                 id="data_checkout"
                 type="date"
                 {...register('data_checkout')}
-                className="w-full px-3 py-2 text-sm font-mono tabular-nums border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:border-emerald-700"
+                className="w-full px-3 py-2 text-sm tabular-nums border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:border-emerald-700"
               />
               {errors.data_checkout && (
                 <p className="mt-1 text-xs text-red-600">
@@ -461,7 +461,7 @@ export const ReservaFormPage: React.FC = () => {
           <div className="border-b border-slate-100 pb-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
               <h2 className="text-base font-semibold text-slate-900">
-                03. Valores Financeiros e Saldo Automático
+                Valores
               </h2>
               <p className="text-xs text-slate-500">
                 Política da pousada: 50% na reserva e restante no check-in.
@@ -483,7 +483,7 @@ export const ReservaFormPage: React.FC = () => {
                 htmlFor="input_valor_total"
                 className="block text-xs font-semibold text-slate-700 mb-1.5"
               >
-                Valor Total da Hospedagem (R$) *
+                Valor total (R$) *
               </label>
               <input
                 id="input_valor_total"
@@ -491,7 +491,7 @@ export const ReservaFormPage: React.FC = () => {
                 inputMode="numeric"
                 value={textoValorTotal}
                 onChange={handleValorTotalChange}
-                className="w-full px-3.5 py-2.5 text-sm font-mono tabular-nums border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:border-emerald-700"
+                className="w-full px-3.5 py-2.5 text-sm tabular-nums border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:border-emerald-700"
               />
               {errors.valor_total_hospedagem && (
                 <p className="mt-1 text-xs text-red-600">
@@ -505,7 +505,7 @@ export const ReservaFormPage: React.FC = () => {
                 htmlFor="input_valor_pago"
                 className="block text-xs font-semibold text-slate-700 mb-1.5"
               >
-                Valor Total Pago (R$) *
+                Valor pago (R$) *
               </label>
               <input
                 id="input_valor_pago"
@@ -513,7 +513,7 @@ export const ReservaFormPage: React.FC = () => {
                 inputMode="numeric"
                 value={textoValorPago}
                 onChange={handleValorPagoChange}
-                className="w-full px-3.5 py-2.5 text-sm font-mono tabular-nums border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:border-emerald-700"
+                className="w-full px-3.5 py-2.5 text-sm tabular-nums border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:border-emerald-700"
               />
               {errors.valor_total_pago && (
                 <p className="mt-1 text-xs text-red-600">
@@ -527,7 +527,7 @@ export const ReservaFormPage: React.FC = () => {
                 htmlFor="saldo_somente_leitura"
                 className="flex items-center justify-between text-xs font-semibold text-slate-700 mb-1.5"
               >
-                <span>Saldo a Receber (Automático)</span>
+                <span>A receber</span>
                 <Lock className="w-3.5 h-3.5 text-slate-400" />
               </label>
               <input
@@ -536,10 +536,10 @@ export const ReservaFormPage: React.FC = () => {
                 readOnly
                 tabIndex={-1}
                 value={formatarMoedaBRL(saldoCalculadoTempoReal)}
-                className="w-full px-3.5 py-2.5 text-sm font-mono tabular-nums font-semibold bg-slate-100 text-slate-800 border border-slate-300 rounded-lg cursor-not-allowed select-none"
+                className="w-full px-3.5 py-2.5 text-sm tabular-nums font-semibold bg-slate-100 text-slate-800 border border-slate-300 rounded-lg cursor-not-allowed select-none"
               />
               <p className="mt-1 text-xs text-slate-500">
-                Calculado em tempo real (Total − Pago). Somente leitura.
+                Total menos o valor pago. Calculado automaticamente.
               </p>
             </div>
           </div>
@@ -550,7 +550,7 @@ export const ReservaFormPage: React.FC = () => {
             htmlFor="descricao"
             className="block text-xs font-semibold text-slate-700"
           >
-            04. Observações e Descrição da Reserva (Opcional)
+            Observações (opcional)
           </label>
           <textarea
             id="descricao"
@@ -568,7 +568,7 @@ export const ReservaFormPage: React.FC = () => {
 
         <div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <p className="text-xs text-slate-500">
-            O voucher oficial poderá ser visualizado e impresso imediatamente após salvar a reserva.
+            Depois de salvar, o voucher já fica pronto para imprimir.
           </p>
           <div className="flex flex-col-reverse sm:flex-row sm:items-center gap-3 w-full sm:w-auto sm:justify-end">
             <Link
@@ -585,10 +585,10 @@ export const ReservaFormPage: React.FC = () => {
               <Save className="w-4 h-4" />
               <span>
                 {isSubmitting
-                  ? 'Salvando Reserva...'
+                  ? 'Salvando...'
                   : isEdicao
-                  ? 'Salvar Alterações'
-                  : 'Salvar Reserva e Habilitar Voucher'}
+                  ? 'Salvar alterações'
+                  : 'Salvar reserva'}
               </span>
             </button>
           </div>

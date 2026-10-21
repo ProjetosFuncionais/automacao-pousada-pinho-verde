@@ -44,13 +44,15 @@ Centralizar a operação diária de reservas da Pousada Pinho Verde garantindo:
 ├── src/                                   # Código-fonte do Frontend React + TypeScript (ativo no Vite raiz)
 │   ├── components/
 │   │   ├── ConfirmCancelModal.tsx         # Modal de confirmação de cancelamento
-│   │   ├── Layout.tsx                     # Sidebar, cabeçalho e estrutura de página
-│   │   └── ProtectedRoute.tsx             # Proteção de rotas para usuários autenticados e ativos
+│   │   ├── Layout.tsx                     # Menu lateral, cabeçalho e estrutura de página
+│   │   ├── ProtectedRoute.tsx             # Proteção de rotas para usuários autenticados e ativos
+│   │   ├── ReceitaMensalChart.tsx         # Gráfico de faturamento por mês no painel
+│   │   └── ReservaCard.tsx                # Cartão de reserva (telas pequenas)
 │   ├── hooks/
 │   │   └── useAuth.tsx                    # Contexto de sessão (token JWT) + validação de profile
 │   ├── pages/
 │   │   ├── AccessDeniedOrNotFoundPage.tsx # Telas 403 (Acesso Negado) e 404 (Não Encontrado)
-│   │   ├── DashboardPage.tsx              # Resumo financeiro e reservas recentes
+│   │   ├── DashboardPage.tsx              # Resumo financeiro, gráfico e reservas recentes
 │   │   ├── LoginPage.tsx                  # Tela de login com validação Zod
 │   │   ├── ReservaDetailPage.tsx          # Detalhes completos da reserva
 │   │   ├── ReservaFormPage.tsx            # Cadastro e edição com máscaras e saldo em tempo real
@@ -67,16 +69,14 @@ Centralizar a operação diária de reservas da Pousada Pinho Verde garantindo:
 │   ├── App.tsx                            # Definição das rotas da aplicação
 │   ├── index.css                          # Estilos globais e regras @media print
 │   └── main.tsx                           # Ponto de montagem React
-├── frontend/                              # Espelho de configuração para estrutura monorepo no VS Code
-│   ├── .env.example
-│   └── package.json
 ├── backend/                               # API REST Python Flask
 │   ├── app/
 │   │   ├── middleware/
 │   │   │   └── auth_middleware.py         # Decorator @require_auth
 │   │   ├── repositories/
 │   │   │   ├── profile_repository.py      # Acesso à tabela public.profiles
-│   │   │   └── reserva_repository.py      # Acesso à tabela public.reservas
+│   │   │   ├── reserva_repository.py      # Acesso à tabela public.reservas
+│   │   │   └── tentativa_login_repository.py # Falhas de login (bloqueio temporário)
 │   │   ├── routes/
 │   │   │   ├── auth_routes.py             # POST /api/auth/login e GET /api/me
 │   │   │   ├── health_routes.py           # GET /api/health
@@ -88,6 +88,7 @@ Centralizar a operação diária de reservas da Pousada Pinho Verde garantindo:
 │   │   │   ├── reserva_service.py         # Regras de negócio de reservas
 │   │   │   └── voucher_service.py         # Montagem do voucher e políticas da pousada
 │   │   ├── utils/
+│   │   │   ├── db.py                      # Converte tipos do Postgres para JSON
 │   │   │   ├── errors.py                  # Exceção APIError e respostas JSON padronizadas
 │   │   │   └── validators.py              # Validador de CPF, datas, moeda e cálculo de saldo
 │   │   ├── __init__.py                    # Application Factory (create_app)
@@ -105,19 +106,12 @@ Centralizar a operação diária de reservas da Pousada Pinho Verde garantindo:
 │   ├── manage.py                          # init-db, criar-usuario, redefinir-senha etc.
 │   ├── requirements.txt
 │   └── run.py
-├── docs/
-│   ├── DOCUMENTACAO_PROJETO.md            # Visão geral, situação e processos do dia a dia
-│   └── ESPECIFICACOES_BANCO_BACKEND.md    # Documentação arquitetural e dicionário de dados
+├── .env.example                           # Modelo do .env do frontend
 ├── .gitignore
 ├── index.html
 ├── package.json
 ├── tsconfig.json
+├── vercel.json                            # Publicação: frontend + API no mesmo domínio
 ├── vite.config.ts
 └── README.md
 ```
-
----
-
-
-Detalhes de publicação na Vercel e manutenção de usuários: [docs/DOCUMENTACAO_PROJETO.md](docs/DOCUMENTACAO_PROJETO.md).
-

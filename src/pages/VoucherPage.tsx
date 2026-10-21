@@ -89,7 +89,7 @@ export const VoucherPage: React.FC = () => {
             className="inline-flex items-center gap-1.5 py-1.5 text-xs font-medium text-slate-700 hover:text-slate-900"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Voltar para Detalhes da Reserva</span>
+            <span>Voltar para a reserva</span>
           </Link>
         </div>
 
@@ -100,7 +100,7 @@ export const VoucherPage: React.FC = () => {
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-3 sm:py-2 text-sm sm:text-xs font-semibold text-white bg-emerald-800 hover:bg-emerald-900 rounded-lg transition-colors whitespace-nowrap cursor-pointer"
           >
             <Printer className="w-4 h-4" />
-            <span>Imprimir / Salvar como PDF</span>
+            <span>Imprimir ou salvar PDF</span>
           </button>
         </div>
       </div>
@@ -115,12 +115,12 @@ export const VoucherPage: React.FC = () => {
               </h1>
             </div>
             <p className="text-xs text-slate-600">
-              Comprovante Oficial de Reserva e Voucher de Hospedagem
+              Voucher de hospedagem
             </p>
           </div>
 
-          <div className="sm:text-right space-y-1 font-mono tabular-nums">
-            <p className="text-xs text-slate-500">Código do Voucher</p>
+          <div className="sm:text-right space-y-1 tabular-nums">
+            <p className="text-xs text-slate-500">Código do voucher</p>
             <p className="text-lg font-semibold text-slate-900">
               {voucher.codigo_voucher}
             </p>
@@ -142,29 +142,29 @@ export const VoucherPage: React.FC = () => {
 
         <section className="space-y-3">
           <h2 className="text-xs font-semibold text-slate-500 border-b border-slate-200 pb-1.5">
-            01. Dados do Hóspede Titular
+            Hóspede
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
             <div className="col-span-2 sm:col-span-1">
-              <p className="text-xs text-slate-500">Nome Completo</p>
+              <p className="text-xs text-slate-500">Nome completo</p>
               <p className="font-semibold text-slate-900">
                 {reserva.nome_completo}
               </p>
             </div>
             <div>
               <p className="text-xs text-slate-500">CPF</p>
-              <p className="font-mono tabular-nums font-medium text-slate-900">
+              <p className="tabular-nums font-medium text-slate-900">
                 {reserva.cpf}
               </p>
             </div>
             <div>
-              <p className="text-xs text-slate-500">WhatsApp de Contato</p>
-              <p className="font-mono tabular-nums font-medium text-slate-900">
+              <p className="text-xs text-slate-500">WhatsApp</p>
+              <p className="tabular-nums font-medium text-slate-900">
                 {reserva.whatsapp}
               </p>
             </div>
             <div className="col-span-2 sm:col-span-3">
-              <p className="text-xs text-slate-500">Endereço Residencial</p>
+              <p className="text-xs text-slate-500">Endereço</p>
               <p className="text-slate-800">{reserva.endereco}</p>
             </div>
           </div>
@@ -172,25 +172,25 @@ export const VoucherPage: React.FC = () => {
 
         <section className="space-y-3">
           <h2 className="text-xs font-semibold text-slate-500 border-b border-slate-200 pb-1.5">
-            02. Detalhes da Acomodação e Período
+            Hospedagem
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
             <div className="col-span-2">
-              <p className="text-xs text-slate-500">Chalé Reservado</p>
+              <p className="text-xs text-slate-500">Chalé</p>
               <p className="font-semibold text-slate-900">
                 {reserva.numero_chale}
               </p>
             </div>
             <div>
-              <p className="text-xs text-slate-500">Nº de Hóspedes</p>
-              <p className="font-mono tabular-nums font-semibold text-slate-900">
+              <p className="text-xs text-slate-500">Hóspedes</p>
+              <p className="tabular-nums font-semibold text-slate-900">
                 {reserva.quantidade_pessoas}{' '}
                 {reserva.quantidade_pessoas === 1 ? 'pessoa' : 'pessoas'}
               </p>
             </div>
             <div>
-              <p className="text-xs text-slate-500">Total de Diárias</p>
-              <p className="font-mono tabular-nums font-semibold text-slate-900">
+              <p className="text-xs text-slate-500">Diárias</p>
+              <p className="tabular-nums font-semibold text-slate-900">
                 {reserva.quantidade_diarias}{' '}
                 {reserva.quantidade_diarias === 1 ? 'diária' : 'diárias'}
               </p>
@@ -198,14 +198,14 @@ export const VoucherPage: React.FC = () => {
 
             <div className="col-span-2 p-3.5 bg-slate-50 border border-slate-200 rounded-lg">
               <p className="text-xs text-slate-500">Entrada (Check-in às 15h)</p>
-              <p className="font-mono tabular-nums text-sm sm:text-base font-semibold text-slate-900">
+              <p className="tabular-nums text-sm sm:text-base font-semibold text-slate-900">
                 {formatarDataBR(reserva.data_checkin)} · a partir das 15h00
               </p>
             </div>
 
             <div className="col-span-2 p-3.5 bg-slate-50 border border-slate-200 rounded-lg">
               <p className="text-xs text-slate-500">Saída (Check-out às 12h)</p>
-              <p className="font-mono tabular-nums text-sm sm:text-base font-semibold text-slate-900">
+              <p className="tabular-nums text-sm sm:text-base font-semibold text-slate-900">
                 {formatarDataBR(reserva.data_checkout)} · até as 12h00
               </p>
             </div>
@@ -213,7 +213,7 @@ export const VoucherPage: React.FC = () => {
 
           {reserva.descricao && (
             <div className="pt-2">
-              <p className="text-xs text-slate-500">Observações da Reserva</p>
+              <p className="text-xs text-slate-500">Observações</p>
               <p className="text-sm text-slate-800">{reserva.descricao}</p>
             </div>
           )}
@@ -221,12 +221,12 @@ export const VoucherPage: React.FC = () => {
 
         <section className="space-y-3">
           <h2 className="text-xs font-semibold text-slate-500 border-b border-slate-200 pb-1.5">
-            03. Demonstrativo Financeiro da Hospedagem
+            Valores
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-slate-50 border border-slate-200 rounded-lg font-mono tabular-nums">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-slate-50 border border-slate-200 rounded-lg tabular-nums">
             <div>
               <p className="text-xs font-sans text-slate-500">
-                Valor Total da Hospedagem
+                Valor total da hospedagem
               </p>
               <p className="text-lg font-semibold text-slate-900">
                 {formatarMoedaBRL(reserva.valor_total_hospedagem)}
@@ -234,7 +234,7 @@ export const VoucherPage: React.FC = () => {
             </div>
             <div>
               <p className="text-xs font-sans text-slate-500">
-                Valor Recebido na Reserva
+                Pago na reserva
               </p>
               <p className="text-lg font-semibold text-emerald-800">
                 {formatarMoedaBRL(reserva.valor_total_pago)}
@@ -242,7 +242,7 @@ export const VoucherPage: React.FC = () => {
             </div>
             <div>
               <p className="text-xs font-sans text-slate-500">
-                Saldo a Pagar no Check-in
+                A pagar no check-in
               </p>
               <p className="text-lg font-semibold text-slate-900">
                 {formatarMoedaBRL(reserva.valor_total_receber)}
@@ -253,7 +253,7 @@ export const VoucherPage: React.FC = () => {
 
         <section className="space-y-3">
           <h2 className="text-xs font-semibold text-slate-500 border-b border-slate-200 pb-1.5">
-            04. Políticas de Hospedagem, Cancelamento e Pagamento — Pousada Pinho Verde
+            Políticas da pousada
           </h2>
           <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-xs text-slate-700 leading-relaxed list-disc pl-4">
             {politicas.map((politica, index) => (
@@ -262,7 +262,7 @@ export const VoucherPage: React.FC = () => {
           </ul>
         </section>
 
-        <footer className="no-print pt-6 border-t border-slate-300 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-500 font-mono tabular-nums">
+        <footer className="no-print pt-6 border-t border-slate-300 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-500 tabular-nums">
           <span className="break-all sm:break-normal">ID da Reserva: {reserva.id}</span>
           <span>
             Emitido em {formatarDataHoraBR(voucher.emitido_em)} por{' '}

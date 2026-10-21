@@ -125,16 +125,16 @@ export const ReservaDetailPage: React.FC = () => {
             {reserva.status === 'confirmada' ? (
               <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-800">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                <span>Reserva Confirmada</span>
+                <span>Reserva confirmada</span>
               </span>
             ) : (
               <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-red-700">
                 <XCircle className="w-4 h-4 text-red-600" />
-                <span>Reserva Cancelada</span>
+                <span>Reserva cancelada</span>
               </span>
             )}
           </div>
-          <p className="font-mono tabular-nums text-xs text-slate-500">
+          <p className="tabular-nums text-xs text-slate-500">
             Código: {obterCodigoCurtoReserva(reserva.id)}
             <span className="hidden sm:inline">
               {' '}
@@ -149,7 +149,7 @@ export const ReservaDetailPage: React.FC = () => {
             className="col-span-2 inline-flex items-center justify-center gap-2 px-4 py-3 sm:py-2 text-sm sm:text-xs font-semibold text-white bg-emerald-800 hover:bg-emerald-900 rounded-lg transition-colors whitespace-nowrap"
           >
             <FileText className="w-4 h-4" />
-            <span>Gerar / Imprimir Voucher</span>
+            <span>Ver voucher</span>
           </Link>
 
           {reserva.status === 'confirmada' && (
@@ -167,7 +167,7 @@ export const ReservaDetailPage: React.FC = () => {
                 className="inline-flex items-center justify-center gap-1.5 px-3.5 py-3 sm:py-2 text-sm sm:text-xs font-medium text-red-700 bg-white border border-red-200 hover:bg-red-50 rounded-lg transition-colors whitespace-nowrap cursor-pointer"
               >
                 <Ban className="w-3.5 h-3.5" />
-                <span>Cancelar Reserva</span>
+                <span>Cancelar reserva</span>
               </button>
             </>
           )}
@@ -188,24 +188,24 @@ export const ReservaDetailPage: React.FC = () => {
 
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
         <div className="bg-white border border-slate-200 rounded-xl p-3.5 sm:p-5 space-y-1 min-w-0">
-          <p className="text-xs text-slate-500">Valor Total da Hospedagem</p>
-          <p className="font-mono tabular-nums text-base sm:text-xl font-semibold text-slate-900">
+          <p className="text-xs text-slate-500">Valor total</p>
+          <p className="tabular-nums text-base sm:text-xl font-semibold text-slate-900">
             {formatarMoedaBRL(reserva.valor_total_hospedagem)}
           </p>
         </div>
 
         <div className="bg-white border border-slate-200 rounded-xl p-3.5 sm:p-5 space-y-1 min-w-0">
-          <p className="text-xs text-slate-500">Valor Total Pago</p>
-          <p className="font-mono tabular-nums text-base sm:text-xl font-semibold text-emerald-800">
+          <p className="text-xs text-slate-500">Valor pago</p>
+          <p className="tabular-nums text-base sm:text-xl font-semibold text-emerald-800">
             {formatarMoedaBRL(reserva.valor_total_pago)}
           </p>
         </div>
 
         <div className="col-span-2 sm:col-span-1 bg-white border border-slate-200 rounded-xl p-3.5 sm:p-5 space-y-1 min-w-0">
           <p className="text-xs text-slate-500">
-            Saldo a Receber no Check-in (Automático)
+            A receber no check-in
           </p>
-          <p className="font-mono tabular-nums text-xl font-semibold text-amber-700">
+          <p className="tabular-nums text-xl font-semibold text-amber-700">
             {formatarMoedaBRL(reserva.valor_total_receber)}
           </p>
         </div>
@@ -215,24 +215,24 @@ export const ReservaDetailPage: React.FC = () => {
         <div className="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div className="space-y-3">
             <h2 className="text-xs font-semibold text-slate-500">
-              Dados do Hóspede Titular
+              Hóspede
             </h2>
             <dl className="space-y-2 text-sm">
               <div>
-                <dt className="text-xs text-slate-500">Nome Completo</dt>
+                <dt className="text-xs text-slate-500">Nome completo</dt>
                 <dd className="font-medium text-slate-900">
                   {reserva.nome_completo}
                 </dd>
               </div>
               <div>
                 <dt className="text-xs text-slate-500">CPF</dt>
-                <dd className="font-mono tabular-nums text-slate-800">
+                <dd className="tabular-nums text-slate-800">
                   {reserva.cpf}
                 </dd>
               </div>
               <div>
                 <dt className="text-xs text-slate-500">WhatsApp</dt>
-                <dd className="font-mono tabular-nums text-slate-800">
+                <dd className="tabular-nums text-slate-800">
                   <a
                     href={`https://wa.me/55${extrairDigitos(reserva.whatsapp)}`}
                     target="_blank"
@@ -245,7 +245,7 @@ export const ReservaDetailPage: React.FC = () => {
                 </dd>
               </div>
               <div>
-                <dt className="text-xs text-slate-500">Endereço Completo</dt>
+                <dt className="text-xs text-slate-500">Endereço</dt>
                 <dd className="text-slate-800">{reserva.endereco}</dd>
               </div>
             </dl>
@@ -253,7 +253,7 @@ export const ReservaDetailPage: React.FC = () => {
 
           <div className="space-y-3">
             <h2 className="text-xs font-semibold text-slate-500">
-              Dados da Acomodação e Estadia
+              Hospedagem
             </h2>
             <dl className="space-y-2 text-sm">
               <div>
@@ -263,8 +263,8 @@ export const ReservaDetailPage: React.FC = () => {
                 </dd>
               </div>
               <div>
-                <dt className="text-xs text-slate-500">Quantidade de Pessoas</dt>
-                <dd className="font-mono tabular-nums text-slate-800">
+                <dt className="text-xs text-slate-500">Pessoas</dt>
+                <dd className="tabular-nums text-slate-800">
                   {reserva.quantidade_pessoas}{' '}
                   {reserva.quantidade_pessoas === 1 ? 'hóspede' : 'hóspedes'}
                 </dd>
@@ -273,7 +273,7 @@ export const ReservaDetailPage: React.FC = () => {
                 <dt className="text-xs text-slate-500">
                   Período ({diarias} {diarias === 1 ? 'diária' : 'diárias'})
                 </dt>
-                <dd className="font-mono tabular-nums text-slate-800">
+                <dd className="tabular-nums text-slate-800">
                   <span className="block sm:inline">
                     Check-in: {formatarDataBR(reserva.data_checkin)} (às 15h)
                   </span>
@@ -284,7 +284,7 @@ export const ReservaDetailPage: React.FC = () => {
                 </dd>
               </div>
               <div>
-                <dt className="text-xs text-slate-500">Observações / Descrição</dt>
+                <dt className="text-xs text-slate-500">Observações</dt>
                 <dd className="text-slate-700">
                   {reserva.descricao || 'Nenhuma observação adicional registrada.'}
                 </dd>
@@ -293,7 +293,7 @@ export const ReservaDetailPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="px-4 sm:px-6 py-4 bg-slate-50/60 text-xs text-slate-500 flex flex-col sm:flex-row sm:items-center justify-between gap-2 font-mono tabular-nums">
+        <div className="px-4 sm:px-6 py-4 bg-slate-50/60 text-xs text-slate-500 flex flex-col sm:flex-row sm:items-center justify-between gap-2 tabular-nums">
           <span>Criado em: {formatarDataHoraBR(reserva.created_at)}</span>
           <span>Última atualização: {formatarDataHoraBR(reserva.updated_at)}</span>
         </div>

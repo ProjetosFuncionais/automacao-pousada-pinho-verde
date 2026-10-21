@@ -16,6 +16,7 @@ import {
   obterCodigoCurtoReserva,
 } from '../utils/formatters';
 import { ReservaCard } from '../components/ReservaCard';
+import { ReceitaMensalChart } from '../components/ReceitaMensalChart';
 
 export const DashboardPage: React.FC = () => {
   const [reservas, setReservas] = useState<Reserva[]>([]);
@@ -88,11 +89,10 @@ export const DashboardPage: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-4 sm:pb-5">
         <div className="space-y-1">
           <p className="text-xs font-medium text-slate-500">
-            Visão Consolidada da Recepção
-            <span className="hidden sm:inline"> · Pousada Pinho Verde</span>
+            Pousada Pinho Verde
           </p>
           <h1 className="font-display text-2xl sm:text-3xl font-semibold text-slate-900">
-            Resumo Operacional e Reservas
+            Visão geral
           </h1>
         </div>
         <div className="hidden lg:flex items-center gap-3">
@@ -101,14 +101,14 @@ export const DashboardPage: React.FC = () => {
             className="inline-flex items-center gap-2 px-4 py-2 text-xs font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg transition-colors whitespace-nowrap"
           >
             <Search className="w-3.5 h-3.5" />
-            <span>Buscar Reserva</span>
+            <span>Buscar reserva</span>
           </Link>
           <Link
             to="/reservas/nova"
             className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-emerald-800 hover:bg-emerald-900 rounded-lg transition-colors whitespace-nowrap"
           >
             <CalendarPlus className="w-3.5 h-3.5" />
-            <span>Cadastrar Reserva</span>
+            <span>Nova reserva</span>
           </Link>
         </div>
       </div>
@@ -119,67 +119,71 @@ export const DashboardPage: React.FC = () => {
         </div>
       )}
 
-      <section aria-label="Indicadores Financeiros e de Ocupação">
+      <section aria-label="Resumo das reservas">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <div className="bg-white border border-slate-200 rounded-xl p-3.5 sm:p-5 space-y-1.5 min-w-0">
             <p className="text-xs font-medium text-slate-500">
-              Reservas Confirmadas
+              Reservas confirmadas
             </p>
-            <p className="font-mono tabular-nums text-base sm:text-2xl font-semibold text-slate-900 break-words">
+            <p className="text-base sm:text-2xl font-semibold text-slate-900 break-words">
               {carregando ? '—' : resumo.qtdConfirmadas}
             </p>
             <p className="text-xs text-slate-500">
-              {resumo.totalHospedes} hóspedes previstos · {resumo.qtdCanceladas}{' '}
-              cancelada(s)
+              {resumo.totalHospedes}{' '}
+              {resumo.totalHospedes === 1 ? 'hóspede' : 'hóspedes'} ·{' '}
+              {resumo.qtdCanceladas}{' '}
+              {resumo.qtdCanceladas === 1 ? 'cancelada' : 'canceladas'}
             </p>
           </div>
 
           <div className="bg-white border border-slate-200 rounded-xl p-3.5 sm:p-5 space-y-1.5 min-w-0">
             <p className="text-xs font-medium text-slate-500">
-              Total em Hospedagens Ativas
+              Valor das reservas
             </p>
-            <p className="font-mono tabular-nums text-base sm:text-2xl font-semibold text-slate-900 break-words">
+            <p className="text-base sm:text-2xl font-semibold text-slate-900 break-words">
               {carregando ? '—' : formatarMoedaBRL(resumo.totalHospedagem)}
             </p>
             <p className="hidden sm:block text-xs text-slate-500">
-              Soma bruta das reservas confirmadas
+              Soma das confirmadas
             </p>
           </div>
 
           <div className="bg-white border border-slate-200 rounded-xl p-3.5 sm:p-5 space-y-1.5 min-w-0">
             <p className="text-xs font-medium text-slate-500">
-              Total Já Recebido (Sinais/Quitados)
+              Já recebido
             </p>
-            <p className="font-mono tabular-nums text-base sm:text-2xl font-semibold text-emerald-800 break-words">
+            <p className="text-base sm:text-2xl font-semibold text-emerald-800 break-words">
               {carregando ? '—' : formatarMoedaBRL(resumo.totalPago)}
             </p>
             <p className="hidden sm:block text-xs text-slate-500">
-              Política padrão: 50% no ato da reserva
+              Sinais e pagamentos completos
             </p>
           </div>
 
           <div className="bg-white border border-slate-200 rounded-xl p-3.5 sm:p-5 space-y-1.5 min-w-0">
             <p className="text-xs font-medium text-slate-500">
-              Saldo Pendente no Check-in
+              A receber no check-in
             </p>
-            <p className="font-mono tabular-nums text-base sm:text-2xl font-semibold text-amber-700 break-words">
+            <p className="text-base sm:text-2xl font-semibold text-amber-700 break-words">
               {carregando ? '—' : formatarMoedaBRL(resumo.totalReceber)}
             </p>
             <p className="hidden sm:block text-xs text-slate-500">
-              Calculado automaticamente pelo sistema
+              Saldo das reservas confirmadas
             </p>
           </div>
         </div>
       </section>
 
+      <ReceitaMensalChart reservas={reservas} carregando={carregando} />
+
       <section className="bg-white border border-slate-200 rounded-xl overflow-hidden">
         <div className="px-4 sm:px-6 py-4 border-b border-slate-200 flex items-center justify-between gap-4">
           <div>
             <h2 className="text-base font-semibold text-slate-900">
-              Reservas Recentes
+              Últimas reservas
             </h2>
             <p className="hidden sm:block text-xs text-slate-500">
-              Últimos registros cadastrados pela recepção da pousada
+              As 5 cadastradas mais recentemente
             </p>
           </div>
           <Link
@@ -206,14 +210,14 @@ export const DashboardPage: React.FC = () => {
               Nenhuma reserva cadastrada até o momento.
             </p>
             <p className="text-xs text-slate-500 max-w-md mx-auto">
-              Cadastre a primeira reserva de chalé para calcular o saldo automaticamente e emitir o voucher oficial.
+              Quando você cadastrar uma reserva, ela aparece aqui com o saldo e o voucher.
             </p>
             <Link
               to="/reservas/nova"
               className="inline-flex items-center gap-2 px-4 py-3 sm:py-2 text-xs font-semibold text-white bg-emerald-800 hover:bg-emerald-900 rounded-lg transition-colors"
             >
               <CalendarPlus className="w-3.5 h-3.5" />
-              <span>Cadastrar Primeira Reserva</span>
+              <span>Cadastrar reserva</span>
             </Link>
           </div>
         ) : (
@@ -228,11 +232,11 @@ export const DashboardPage: React.FC = () => {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50/70 text-xs font-semibold text-slate-600">
-                  <th className="py-3 px-6">Código · Hóspede</th>
-                  <th className="py-3 px-4">Chalé · Pessoas</th>
-                  <th className="py-3 px-4">Check-in / Check-out</th>
-                  <th className="py-3 px-4 text-right">Valor Total</th>
-                  <th className="py-3 px-4 text-right">Saldo a Receber</th>
+                  <th className="py-3 px-6">Hóspede</th>
+                  <th className="py-3 px-4">Chalé</th>
+                  <th className="py-3 px-4">Período</th>
+                  <th className="py-3 px-4 text-right">Valor total</th>
+                  <th className="py-3 px-4 text-right">A receber</th>
                   <th className="py-3 px-4">Status</th>
                   <th className="py-3 px-6 text-right">Ações</th>
                 </tr>
@@ -247,7 +251,7 @@ export const DashboardPage: React.FC = () => {
                       <div className="font-medium text-slate-900">
                         {r.nome_completo}
                       </div>
-                      <div className="text-xs text-slate-500 font-mono tabular-nums">
+                      <div className="text-xs text-slate-500 tabular-nums">
                         {obterCodigoCurtoReserva(r.id)} · CPF {r.cpf}
                       </div>
                     </td>
@@ -258,14 +262,14 @@ export const DashboardPage: React.FC = () => {
                         {r.quantidade_pessoas === 1 ? 'hóspede' : 'hóspedes'}
                       </div>
                     </td>
-                    <td className="py-3.5 px-4 font-mono tabular-nums text-xs text-slate-700 whitespace-nowrap">
+                    <td className="py-3.5 px-4 tabular-nums text-xs text-slate-700 whitespace-nowrap">
                       {formatarDataBR(r.data_checkin)} →{' '}
                       {formatarDataBR(r.data_checkout)}
                     </td>
-                    <td className="py-3.5 px-4 text-right font-mono tabular-nums text-slate-800 whitespace-nowrap">
+                    <td className="py-3.5 px-4 text-right tabular-nums text-slate-800 whitespace-nowrap">
                       {formatarMoedaBRL(r.valor_total_hospedagem)}
                     </td>
-                    <td className="py-3.5 px-4 text-right font-mono tabular-nums font-semibold text-slate-900 whitespace-nowrap">
+                    <td className="py-3.5 px-4 text-right tabular-nums font-semibold text-slate-900 whitespace-nowrap">
                       {formatarMoedaBRL(r.valor_total_receber)}
                     </td>
                     <td className="py-3.5 px-4 whitespace-nowrap">

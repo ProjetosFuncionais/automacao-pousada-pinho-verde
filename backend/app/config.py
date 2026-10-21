@@ -8,7 +8,6 @@ class Config:
 
     FLASK_ENV: str = os.getenv("FLASK_ENV", "development")
     TESTING: bool = FLASK_ENV == "testing"
-    PORT: int = int(os.getenv("PORT", "5000"))
 
     CORS_ORIGINS: list[str] = [
         origin.strip()

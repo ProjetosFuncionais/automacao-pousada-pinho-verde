@@ -83,11 +83,11 @@ export const ReservasListPage: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-4 sm:pb-5">
         <div className="space-y-1">
           <p className="text-xs font-medium text-slate-500">
-            Consulta e Histórico Completo
+            Histórico completo
             <span className="hidden sm:inline"> · Pousada Pinho Verde</span>
           </p>
           <h1 className="font-display text-2xl sm:text-3xl font-semibold text-slate-900">
-            Lista de Reservas
+            Reservas
           </h1>
         </div>
         <Link
@@ -95,7 +95,7 @@ export const ReservasListPage: React.FC = () => {
           className="hidden lg:inline-flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-emerald-800 hover:bg-emerald-900 rounded-lg transition-colors whitespace-nowrap"
         >
           <CalendarPlus className="w-4 h-4" />
-          <span>Nova Reserva</span>
+          <span>Nova reserva</span>
         </Link>
       </div>
 
@@ -216,7 +216,7 @@ export const ReservasListPage: React.FC = () => {
                 }}
                 className="px-4 py-3 sm:py-2 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
               >
-                Limpar Filtros
+                Limpar filtros
               </button>
             ) : null}
           </div>
@@ -225,11 +225,11 @@ export const ReservasListPage: React.FC = () => {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50/70 text-xs font-semibold text-slate-600">
-                  <th className="py-3 px-5">Hóspede · Código · CPF</th>
-                  <th className="py-3 px-3">Chalé · Ocupação</th>
+                  <th className="py-3 px-5">Hóspede</th>
+                  <th className="py-3 px-3">Chalé</th>
                   <th className="py-3 px-3">Período</th>
-                  <th className="py-3 px-3 text-right">Total / Pago</th>
-                  <th className="py-3 px-3 text-right">Saldo a Receber</th>
+                  <th className="py-3 px-3 text-right">Total / pago</th>
+                  <th className="py-3 px-3 text-right">A receber</th>
                   <th className="py-3 px-3">Status</th>
                   <th className="py-3 px-5 text-right">Ações</th>
                 </tr>
@@ -244,7 +244,7 @@ export const ReservasListPage: React.FC = () => {
                       <div className="font-medium text-slate-900">
                         {reserva.nome_completo}
                       </div>
-                      <div className="text-xs text-slate-500 font-mono tabular-nums">
+                      <div className="text-xs text-slate-500 tabular-nums">
                         <span className="block whitespace-nowrap">
                           {obterCodigoCurtoReserva(reserva.id)}
                         </span>
@@ -260,13 +260,13 @@ export const ReservasListPage: React.FC = () => {
                         {reserva.quantidade_pessoas === 1 ? 'pessoa' : 'pessoas'}
                       </div>
                     </td>
-                    <td className="py-3.5 px-3 font-mono tabular-nums text-xs text-slate-700 whitespace-nowrap">
+                    <td className="py-3.5 px-3 tabular-nums text-xs text-slate-700 whitespace-nowrap">
                       <div>{formatarDataBR(reserva.data_checkin)}</div>
                       <div className="text-slate-500">
                         até {formatarDataBR(reserva.data_checkout)}
                       </div>
                     </td>
-                    <td className="py-3.5 px-3 text-right font-mono tabular-nums whitespace-nowrap">
+                    <td className="py-3.5 px-3 text-right tabular-nums whitespace-nowrap">
                       <div className="text-slate-900">
                         {formatarMoedaBRL(reserva.valor_total_hospedagem)}
                       </div>
@@ -274,7 +274,7 @@ export const ReservasListPage: React.FC = () => {
                         Pago: {formatarMoedaBRL(reserva.valor_total_pago)}
                       </div>
                     </td>
-                    <td className="py-3.5 px-3 text-right font-mono tabular-nums font-semibold text-slate-900 whitespace-nowrap">
+                    <td className="py-3.5 px-3 text-right tabular-nums font-semibold text-slate-900 whitespace-nowrap">
                       {formatarMoedaBRL(reserva.valor_total_receber)}
                     </td>
                     <td className="py-3.5 px-3 whitespace-nowrap">

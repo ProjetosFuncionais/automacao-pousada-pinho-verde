@@ -23,13 +23,13 @@ export const Layout: React.FC = () => {
   const isNovaReserva = path === '/reservas/nova';
 
   const obterTituloBreadcrumb = (): string => {
-    if (path === '/' || path === '/dashboard') return 'Painel Geral';
-    if (path === '/reservas') return 'Gestão de Reservas';
-    if (isNovaReserva) return 'Nova Reserva';
-    if (path.endsWith('/editar')) return 'Editar Reserva';
-    if (path.endsWith('/voucher')) return 'Emissão de Voucher';
-    if (path.startsWith('/reservas/')) return 'Detalhes da Reserva';
-    return 'Sistema de Reservas';
+    if (path === '/' || path === '/dashboard') return 'Visão geral';
+    if (path === '/reservas') return 'Reservas';
+    if (isNovaReserva) return 'Nova reserva';
+    if (path.endsWith('/editar')) return 'Editar reserva';
+    if (path.endsWith('/voucher')) return 'Voucher';
+    if (path.startsWith('/reservas/')) return 'Detalhes da reserva';
+    return 'Reservas';
   };
 
   const itensNavegacaoMovel = [
@@ -75,7 +75,7 @@ export const Layout: React.FC = () => {
             }
           >
             <LayoutDashboard className="w-4 h-4 shrink-0" />
-            <span>Dashboard</span>
+            <span>Painel</span>
           </NavLink>
 
           <NavLink
@@ -90,7 +90,7 @@ export const Layout: React.FC = () => {
             }
           >
             <ListFilter className="w-4 h-4 shrink-0" />
-            <span>Lista de Reservas</span>
+            <span>Reservas</span>
           </NavLink>
 
           <NavLink
@@ -104,7 +104,7 @@ export const Layout: React.FC = () => {
             }
           >
             <CalendarPlus className="w-4 h-4 shrink-0" />
-            <span>Cadastrar Reserva</span>
+            <span>Nova reserva</span>
           </NavLink>
         </nav>
 
@@ -124,7 +124,7 @@ export const Layout: React.FC = () => {
               className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-emerald-100 hover:text-white bg-emerald-900/70 hover:bg-emerald-800 rounded-lg transition-colors whitespace-nowrap cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5" />
-              <span>Encerrar Sessão</span>
+              <span>Sair</span>
             </button>
           </div>
         )}
@@ -176,7 +176,7 @@ export const Layout: React.FC = () => {
             className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-emerald-800 hover:bg-emerald-900 rounded-lg transition-colors whitespace-nowrap shrink-0"
           >
             <CalendarPlus className="w-3.5 h-3.5" />
-            <span>Nova Reserva</span>
+            <span>Nova reserva</span>
           </Link>
         </header>
 
@@ -185,7 +185,7 @@ export const Layout: React.FC = () => {
         </main>
 
         <footer className="no-print hidden lg:flex border-t border-slate-200/80 px-8 py-4 text-xs text-slate-500 items-center justify-between gap-2">
-          <span>Pousada Pinho Verde · Sistema de Vouchers e Gestão de Reservas</span>
+          <span>Pousada Pinho Verde</span>
           <span>Check-in às 15h · Check-out às 12h</span>
         </footer>
       </div>

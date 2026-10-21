@@ -24,18 +24,18 @@ export const AccessDeniedOrNotFoundPage: React.FC<
         </div>
 
         <div className="space-y-2">
-          <p className="font-mono text-xs text-slate-500">
-            {isAcessoNegado ? 'Código HTTP 403 · Acesso Restrito' : 'Código HTTP 404 · Página Não Encontrada'}
+          <p className="tabular-nums text-xs text-slate-500">
+            {isAcessoNegado ? 'Erro 403' : 'Erro 404'}
           </p>
           <h1 className="font-display text-2xl font-semibold text-slate-900">
             {isAcessoNegado
-              ? 'Acesso Negado ao Recurso'
-              : 'Página ou Reserva Não Encontrada'}
+              ? 'Acesso negado'
+              : 'Página não encontrada'}
           </h1>
           <p className="text-sm text-slate-600 leading-relaxed">
             {mensagemCustomizada ||
               (isAcessoNegado
-                ? 'Seu perfil de colaborador não possui permissão ativa para visualizar este conteúdo. Contate a administração da Pousada Pinho Verde.'
+                ? 'Seu acesso não permite ver esta página. Fale com a administração da pousada.'
                 : 'O endereço acessado ou o identificador da reserva informado não existe em nossa base de dados.')}
           </p>
         </div>
@@ -46,13 +46,13 @@ export const AccessDeniedOrNotFoundPage: React.FC<
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-3 sm:py-2 text-sm sm:text-xs font-semibold text-white bg-emerald-800 hover:bg-emerald-900 rounded-lg transition-colors whitespace-nowrap"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Ir para o Dashboard</span>
+            <span>Ir para o painel</span>
           </Link>
           <Link
             to="/reservas"
             className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-3 sm:py-2 text-sm sm:text-xs font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg transition-colors whitespace-nowrap"
           >
-            Consultar Reservas
+            Ver reservas
           </Link>
         </div>
       </div>

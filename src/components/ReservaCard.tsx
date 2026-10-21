@@ -26,7 +26,7 @@ export const ReservaCard: React.FC<ReservaCardProps> = ({
           <h3 className="text-base font-semibold text-slate-900 break-words">
             {reserva.nome_completo}
           </h3>
-          <p className="font-mono tabular-nums text-xs text-slate-500">
+          <p className="tabular-nums text-xs text-slate-500">
             {obterCodigoCurtoReserva(reserva.id)}
           </p>
         </div>
@@ -53,28 +53,28 @@ export const ReservaCard: React.FC<ReservaCardProps> = ({
         </div>
         <div>
           <dt className="text-xs text-slate-500">Check-in</dt>
-          <dd className="font-mono tabular-nums text-slate-800">
+          <dd className="tabular-nums text-slate-800">
             {formatarDataBR(reserva.data_checkin)}
           </dd>
         </div>
         <div>
           <dt className="text-xs text-slate-500">Check-out</dt>
-          <dd className="font-mono tabular-nums text-slate-800">
+          <dd className="tabular-nums text-slate-800">
             {formatarDataBR(reserva.data_checkout)}
           </dd>
         </div>
         <div>
-          <dt className="text-xs text-slate-500">Total · Pago</dt>
-          <dd className="font-mono tabular-nums text-slate-800">
+          <dt className="text-xs text-slate-500">Total · pago</dt>
+          <dd className="tabular-nums text-slate-800">
             {formatarMoedaBRL(reserva.valor_total_hospedagem)}
           </dd>
-          <dd className="font-mono tabular-nums text-xs text-emerald-700">
+          <dd className="tabular-nums text-xs text-emerald-700">
             Pago: {formatarMoedaBRL(reserva.valor_total_pago)}
           </dd>
         </div>
         <div>
           <dt className="text-xs text-slate-500">Saldo a receber</dt>
-          <dd className="font-mono tabular-nums text-base font-semibold text-slate-900">
+          <dd className="tabular-nums text-base font-semibold text-slate-900">
             {formatarMoedaBRL(reserva.valor_total_receber)}
           </dd>
         </div>

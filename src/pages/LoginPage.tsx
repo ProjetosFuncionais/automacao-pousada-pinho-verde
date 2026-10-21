@@ -7,14 +7,13 @@ import { loginSchema, LoginFormValues } from '../schemas/reservaSchema';
 import { useAuth } from '../hooks/useAuth';
 
 export const LoginPage: React.FC = () => {
-  const { signIn, isDemoMode } = useAuth();
+  const { signIn } = useAuth();
   const navigate = useNavigate();
   const [erroLogin, setErroLogin] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors, isSubmitting },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -38,12 +37,6 @@ export const LoginPage: React.FC = () => {
     }
   };
 
-  const preencherCredencialDemo = (email: string) => {
-    setValue('email', email, { shouldValidate: true });
-    setValue('password', 'senha123', { shouldValidate: true });
-    setErroLogin(null);
-  };
-
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-[#F8FAF9]">
       <div className="lg:w-5/12 bg-[#0F291E] text-white px-6 pt-[max(1.5rem,env(safe-area-inset-top))] pb-6 lg:p-14 flex flex-col justify-between">
@@ -56,20 +49,19 @@ export const LoginPage: React.FC = () => {
 
         <div className="mt-5 lg:mt-0 space-y-2 lg:space-y-4 max-w-md">
           <p className="hidden lg:block text-xs font-medium text-emerald-300/90">
-            Serra da Mantiqueira · Portal Interno de Colaboradores
+            Serra da Mantiqueira · Acesso da equipe
           </p>
           <h1 className="font-display text-xl sm:text-3xl lg:text-4xl font-semibold leading-tight text-white">
-            Sistema de Vouchers e Gestão de Reservas
+            Reservas e vouchers
           </h1>
           <p className="hidden lg:block text-sm text-emerald-100/80 leading-relaxed">
-            Controle centralizado de reservas de chalés, cálculo automático de
-            saldo financeiro e emissão padronizada de vouchers de hospedagem.
+            Reservas dos chalés, saldo de cada hóspede e vouchers prontos para imprimir.
           </p>
         </div>
 
         <div className="hidden lg:block text-xs text-emerald-200/70 space-y-1 border-t border-emerald-900 pt-6">
           <p>Horários oficiais: Check-in às 15h · Check-out às 12h</p>
-          <p>Acesso exclusivo para recepção e administração autorizada.</p>
+          <p>Acesso restrito à equipe da pousada.</p>
         </div>
       </div>
 
@@ -77,10 +69,10 @@ export const LoginPage: React.FC = () => {
         <div className="w-full max-w-md bg-white border border-slate-200 rounded-xl p-5 sm:p-8 space-y-6">
           <div className="space-y-1.5">
             <h2 className="font-display text-2xl font-semibold text-slate-900">
-              Acesso ao Sistema
+              Entrar
             </h2>
             <p className="text-sm text-slate-600">
-              Entre com seu e-mail e senha de colaborador para gerenciar as reservas.
+              Use seu e-mail e senha da pousada.
             </p>
           </div>
 
@@ -100,7 +92,7 @@ export const LoginPage: React.FC = () => {
                 htmlFor="email"
                 className="block text-xs font-semibold text-slate-700 mb-1.5"
               >
-                E-mail do Colaborador
+                E-mail
               </label>
               <div className="relative">
                 <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -151,46 +143,9 @@ export const LoginPage: React.FC = () => {
               disabled={isSubmitting}
               className="w-full py-3 sm:py-2.5 px-4 text-sm font-semibold text-white bg-emerald-800 hover:bg-emerald-900 rounded-lg transition-colors cursor-pointer disabled:opacity-60"
             >
-              {isSubmitting ? 'Autenticando...' : 'Entrar no Sistema'}
+              {isSubmitting ? 'Autenticando...' : 'Entrar'}
             </button>
           </form>
-
-          {isDemoMode && (
-            <div className="pt-4 border-t border-slate-200 space-y-2.5">
-              <p className="text-xs font-medium text-slate-600">
-                Contas fictícias para desenvolvimento e validação de perfis:
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                <button
-                  type="button"
-                  onClick={() =>
-                    preencherCredencialDemo('recepcao@pousadapinhoverde.com.br')
-                  }
-                  className="px-2.5 py-1.5 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-md transition-colors cursor-pointer whitespace-nowrap"
-                >
-                  Perfil Recepção
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    preencherCredencialDemo('admin@pousadapinhoverde.com.br')
-                  }
-                  className="px-2.5 py-1.5 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-md transition-colors cursor-pointer whitespace-nowrap"
-                >
-                  Perfil Admin
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    preencherCredencialDemo('inativo@pousadapinhoverde.com.br')
-                  }
-                  className="px-2.5 py-1.5 text-xs font-medium text-red-700 bg-red-50 hover:bg-red-100 rounded-md transition-colors cursor-pointer whitespace-nowrap"
-                >
-                  Testar Inativo
-                </button>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>

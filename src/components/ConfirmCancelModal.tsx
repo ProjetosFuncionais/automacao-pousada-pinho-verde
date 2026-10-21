@@ -83,7 +83,7 @@ export const ConfirmCancelModal: React.FC<ConfirmCancelModalProps> = ({
             disabled={carregando}
             className="px-4 py-3 sm:py-2 text-sm sm:text-xs font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors whitespace-nowrap cursor-pointer disabled:opacity-60"
           >
-            {carregando ? 'Cancelando reserva...' : 'Confirmar Cancelamento'}
+            {carregando ? 'Cancelando reserva...' : 'Confirmar cancelamento'}
           </button>
         </div>
       </div>
