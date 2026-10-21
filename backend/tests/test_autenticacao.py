@@ -18,7 +18,7 @@ def test_bloqueia_requisicao_sem_token(client):
 def test_bloqueia_usuario_com_profile_inativo(client):
     with (
         patch(
-            "app.middleware.auth_middleware.verificar_token_supabase",
+            "app.middleware.auth_middleware.verificar_token",
             return_value={
                 "id": "11111111-2222-3333-4444-555555555555",
                 "email": "exfuncionario@pousadapinhoverde.com.br",
@@ -46,7 +46,7 @@ def test_bloqueia_usuario_com_profile_inativo(client):
 def test_libera_usuario_autenticado_com_profile_ativo(client):
     with (
         patch(
-            "app.middleware.auth_middleware.verificar_token_supabase",
+            "app.middleware.auth_middleware.verificar_token",
             return_value={
                 "id": "11111111-2222-3333-4444-555555555555",
                 "email": "recepcao@pousadapinhoverde.com.br",

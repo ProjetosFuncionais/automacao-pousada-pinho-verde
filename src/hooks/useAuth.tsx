@@ -1,9 +1,13 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { isSupabaseConfigured, supabase } from '../services/supabaseClient';
 import {
+  ApiClientError,
   apiService,
+  EVENTO_SESSAO_EXPIRADA,
+  isDemoMode,
   obterSessaoDemoLocal,
+  obterTokenSalvo,
   salvarSessaoDemoLocal,
+  salvarToken,
 } from '../services/api';
 import { Profile } from '../types/reserva';
 
@@ -52,9 +56,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     async function inicializarSessao() {
       try {
-        if (isSupabaseConfigured && supabase) {
-          const { data } = await supabase.auth.getSession();
-          if (data.session) {
+        if (!isDemoMode) {
+          if (obterTokenSalvo()) {
             const profile = await apiService.getMe();
             if (mounted) setUser(profile);
           }
@@ -69,6 +72,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           }
         }
       } catch {
+        if (!isDemoMode) salvarToken(null);
         if (mounted) setUser(null);
       } finally {
         if (mounted) setLoading(false);
@@ -77,55 +81,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     inicializarSessao();
 
-    if (isSupabaseConfigured && supabase) {
-      const { data: listener } = supabase.auth.onAuthStateChange(
-        async (_event, session) => {
-          if (!session) {
-            setUser(null);
-            return;
-          }
-          try {
-            const profile = await apiService.getMe();
-            setUser(profile);
-          } catch {
-            setUser(null);
-          }
-        }
-      );
-
-      return () => {
-        mounted = false;
-        listener.subscription.unsubscribe();
-      };
-    }
+    // Token expirado ou inválido em qualquer chamada à API: volta para o login.
+    const aoExpirarSessao = () => {
+      if (mounted) setUser(null);
+    };
+    window.addEventListener(EVENTO_SESSAO_EXPIRADA, aoExpirarSessao);
 
     return () => {
       mounted = false;
+      window.removeEventListener(EVENTO_SESSAO_EXPIRADA, aoExpirarSessao);
     };
   }, []);
 
   const signIn = async (email: string, password: string): Promise<void> => {
     const emailLimpo = email.trim().toLowerCase();
 
-    if (isSupabaseConfigured && supabase) {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: emailLimpo,
-        password,
-      });
-
-      if (error) {
-        throw new Error('E-mail ou senha inválidos. Verifique suas credenciais.');
-      }
-
-      const profile = await apiService.getMe();
-      if (!profile.ativo) {
-        await supabase.auth.signOut();
+    if (!isDemoMode) {
+      try {
+        const profile = await apiService.login(emailLimpo, password);
+        setUser(profile);
+      } catch (err) {
+        if (err instanceof ApiClientError && err.status === 401) {
+          throw new Error('E-mail ou senha inválidos. Verifique suas credenciais.');
+        }
+        if (err instanceof ApiClientError) {
+          throw new Error(err.message);
+        }
         throw new Error(
-          'Seu perfil de colaborador está inativo. Contate a administração da pousada.'
+          'Não foi possível conectar ao servidor. Verifique sua internet e tente novamente.'
         );
       }
-
-      setUser(profile);
       return;
     }
 
@@ -156,9 +141,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const signOut = async (): Promise<void> => {
-    if (isSupabaseConfigured && supabase) {
-      await supabase.auth.signOut();
-    }
+    salvarToken(null);
     salvarSessaoDemoLocal(null);
     setUser(null);
   };
@@ -168,7 +151,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       value={{
         user,
         loading,
-        isDemoMode: !isSupabaseConfigured,
+        isDemoMode,
         signIn,
         signOut,
       }}

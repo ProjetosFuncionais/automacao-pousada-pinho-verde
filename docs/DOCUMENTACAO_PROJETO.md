@@ -2,7 +2,7 @@
 
 Documento de referência do projeto: o que é o sistema, o que foi construído, como ele está publicado e como executar cada processo do dia a dia (uso, manutenção e publicação).
 
-Situação descrita em 02/10/2026. Para o detalhe técnico de tabelas e endpoints, ver também [ESPECIFICACOES_BANCO_BACKEND.md](ESPECIFICACOES_BANCO_BACKEND.md).
+Situação descrita em 21/10/2026 (troca do Supabase pelo Neon). Para o detalhe técnico de tabelas e endpoints, ver também [ESPECIFICACOES_BANCO_BACKEND.md](ESPECIFICACOES_BANCO_BACKEND.md).
 
 ---
 
@@ -24,14 +24,15 @@ Sistema web interno para a recepção e a administração da Pousada Pinho Verde
 | :--- | :--- |
 | Site publicado | https://automacao-pousada-pinho-verde.vercel.app (tela e API no mesmo endereço) |
 | Hospedagem | Vercel — frontend (Vite) e API (Flask) como dois serviços do mesmo projeto |
-| Banco e login | Supabase, projeto `lndakiunsmdvsgtzzjil` (PostgreSQL + Supabase Auth) |
+| Banco | PostgreSQL no Neon (plano gratuito), ligado ao projeto da Vercel |
+| Login | Próprio, feito pela API Flask (senha em hash + token JWT) |
 | Código | GitHub: `ProjetosFuncionais/automacao-pousada-pinho-verde`, branch `main` |
-| Usuários cadastrados | 1 — `admin@pousadapinhoverde.com.br`, perfil `admin`, ativo |
-| Reservas gravadas | 1 |
-| Testes do backend | 12 testes, todos passando |
+| Usuários cadastrados | Nenhum no banco novo até rodar `manage.py criar-usuario` (seção 8.4) |
+| Reservas gravadas | Nenhuma no banco novo (os dados antigos ficaram no Supabase pausado) |
+| Testes do backend | 23 testes, todos passando |
 | Checagem de tipos do frontend | passando (`npm run lint`) |
 
-O site publicado usa o mesmo projeto Supabase configurado na máquina local. Ou seja: o que é gravado rodando localmente vai para o mesmo banco do site no ar. Não existe um banco separado de testes.
+Se a `DATABASE_URL` do `backend/.env` for a mesma do site publicado, o que é gravado rodando localmente vai para o mesmo banco do site no ar. O Neon permite criar um *branch* (cópia) do banco para testes, se for preciso.
 
 A senha do admin não fica registrada em nenhum arquivo do projeto. Ela pode ser redefinida a qualquer momento (seção 8.5).
 
@@ -39,7 +40,7 @@ A senha do admin não fica registrada em nenhum arquivo do projeto. Ela pode ser
 
 ## 3. O que foi feito
 
-Todo o trabalho registrado no repositório é de 02/10/2026.
+A construção (3.1 a 3.3) é de 02/10/2026. A troca de banco (3.4) é de 21/10/2026.
 
 ### 3.1. Construção do sistema
 
@@ -53,15 +54,20 @@ Todo o trabalho registrado no repositório é de 02/10/2026.
 
 - O Python do sistema (3.9.6) não roda o backend. Foi instalado o `uv` e criado um ambiente Python 3.12 em `backend/.venv`.
 - A API local roda na porta **5001**, porque a 5000 é ocupada pelo AirPlay Receiver do macOS. Os arquivos `.env` da raiz e de `backend/` apontam para ela.
-- O Supabase do projeto usa chaves no formato novo (`sb_publishable_...` e `sb_secret_...`). Versões antigas da biblioteca `supabase` do Python rejeitam essas chaves; por isso a versão está fixada em `2.31.0`.
-- A biblioteca `cryptography` a partir da versão 49 não tem instalador pronto para Mac Intel; o `requirements.txt` limita a versão nesse caso.
-- O acesso ao Supabase pelo assistente (MCP) está configurado em `.mcp.json` e depende de autorização do dono da conta.
 
-### 3.3. Banco de dados e acesso
+### 3.3. Banco de dados e acesso (Supabase, até 21/10/2026)
 
-- A migration `supabase/migrations/001_initial_schema.sql` foi aplicada no projeto Supabase (tabelas `profiles` e `reservas`).
-- Foi criado o usuário `admin@pousadapinhoverde.com.br` no Supabase Auth, com perfil `admin` ativo na tabela `profiles` (nome "Administrador (Teste)").
-- A senha do admin foi redefinida diretamente no Supabase e o login foi testado com sucesso depois da troca.
+- O sistema usava o Supabase para o banco e para o login. Havia 1 usuário admin e 1 reserva gravados.
+- O projeto Supabase foi pausado por inatividade (plano gratuito) e o acesso à conta foi perdido. Esses dados ficaram lá.
+
+### 3.4. Troca do Supabase pelo Neon (21/10/2026)
+
+- Banco passou a ser PostgreSQL no **Neon**, com a mesma estrutura de tabelas e regras. Script em `backend/db/schema.sql`.
+- O login deixou de usar o Supabase Auth: agora a própria API confere a senha (guardada em hash na tabela `profiles`) e devolve um token JWT.
+- Usuários passam a ser criados e mantidos pelo comando `backend/manage.py` (seção 8.4).
+- Foram removidos: a pasta `supabase/`, o `.mcp.json`, a biblioteca `@supabase/supabase-js` do frontend, a biblioteca `supabase` do backend, o `bun.lock` (não era usado; a Vercel instala com npm) e as variáveis do Supabase dos arquivos `.env`.
+- O modo demonstração agora só liga com `VITE_DEMO_MODE=true`.
+- Testado localmente contra um PostgreSQL real: criação das tabelas, login, cadastro, busca, edição, voucher, cancelamento e bloqueio de usuário inativo, inclusive pelo navegador.
 
 ---
 
@@ -70,18 +76,18 @@ Todo o trabalho registrado no repositório é de 02/10/2026.
 ```text
 [ Navegador: React ]
       │
-      ├── login e sessão ───────────────► [ Supabase Auth ]
+      ├── login (e-mail e senha) ───────► [ API Flask ] → devolve um token
       │
       └── reservas e voucher (com token) ► [ API Flask ]
                                                │ valida o token
                                                │ confere se o perfil está ativo
                                                │ aplica as regras de negócio
                                                ▼
-                                        [ Supabase PostgreSQL ]
+                                        [ PostgreSQL no Neon ]
 ```
 
-- O navegador fala com o Supabase **só para login**. Ele nunca lê nem grava reservas direto no banco.
-- Toda operação de reserva passa pela API Flask, que é a única parte com a chave secreta do banco.
+- O navegador fala **só com a API Flask**, inclusive para o login. Ele nunca lê nem grava direto no banco.
+- A API Flask é a única parte que tem o endereço e a senha do banco (`DATABASE_URL`).
 - Na Vercel, qualquer endereço começando com `/api/` vai para o Flask; o restante vai para o site React.
 
 ### Pastas principais
@@ -91,16 +97,17 @@ Todo o trabalho registrado no repositório é de 02/10/2026.
 | `src/` | Frontend React + TypeScript (telas, formulários, chamadas à API) |
 | `backend/app/` | API Flask: rotas, regras de negócio, acesso ao banco, validações |
 | `backend/tests/` | Testes automatizados (Pytest) |
-| `supabase/migrations/` | Script SQL que cria as tabelas, regras e permissões |
+| `backend/db/schema.sql` | Script SQL que cria as tabelas e regras |
+| `backend/manage.py` | Comandos para criar tabelas e gerenciar usuários |
 | `docs/` | Documentação |
 | `vercel.json` | Configuração da publicação |
 | `frontend/` | Apenas cópias de configuração; o frontend ativo é o da raiz (`src/`) |
 
 ### Tecnologias
 
-- **Frontend:** React 19, Vite, TypeScript, Tailwind CSS, React Router, React Hook Form + Zod, Supabase JS (só autenticação).
-- **Backend:** Python 3.12, Flask 3, Flask-CORS, biblioteca `supabase`, Pytest.
-- **Banco:** PostgreSQL no Supabase, com Row Level Security ativo.
+- **Frontend:** React 19, Vite, TypeScript, Tailwind CSS, React Router, React Hook Form + Zod.
+- **Backend:** Python 3.12, Flask 3, Flask-CORS, psycopg (PostgreSQL), PyJWT (tokens de login), Pytest.
+- **Banco:** PostgreSQL no Neon.
 
 ---
 
@@ -119,9 +126,9 @@ Todo o trabalho registrado no repositório é de 02/10/2026.
 ### 5.1. Entrar no sistema
 
 1. O colaborador informa e-mail e senha.
-2. O Supabase confere a senha e devolve um token de sessão.
-3. O sistema consulta a API (`/api/me`) para confirmar que existe um perfil ativo para esse usuário.
-4. Se o perfil estiver inativo ou não existir, o acesso é negado mesmo com a senha correta.
+2. A API confere a senha e devolve um token de sessão, válido por 12 horas.
+3. Em toda operação, a API confere o token e se o perfil continua ativo.
+4. Se o perfil estiver inativo, o acesso é negado mesmo com a senha correta. Quando o token vence, o sistema volta para a tela de login.
 
 ### 5.2. Cadastrar uma reserva
 
@@ -171,6 +178,7 @@ Essas regras são conferidas em três lugares: no formulário (Zod), na API (Pyt
 | Método | Rota | Função |
 | :--- | :--- | :--- |
 | `GET` | `/api/health` | Verifica se a API está no ar (pública) |
+| `POST` | `/api/auth/login` | Login com e-mail e senha; devolve o token (pública) |
 | `GET` | `/api/me` | Dados do colaborador logado |
 | `GET` | `/api/reservas` | Lista reservas (`?busca=` e `?status=`) |
 | `GET` | `/api/reservas/<id>` | Detalhes de uma reserva |
@@ -179,17 +187,20 @@ Essas regras são conferidas em três lugares: no formulário (Zod), na API (Pyt
 | `PATCH` | `/api/reservas/<id>/cancelar` | Cancela reserva |
 | `GET` | `/api/reservas/<id>/voucher` | Dados do voucher |
 
-Todas, exceto `/api/health`, exigem o token de login. Erros seguem sempre o formato `{"erro": ..., "mensagem": ..., "campos": {}}`.
+Todas, exceto `/api/health` e `/api/auth/login`, exigem o token de login. Erros seguem sempre o formato `{"erro": ..., "mensagem": ..., "campos": {}}`.
 
 ### Tabelas
 
-- **`profiles`** — um registro por colaborador, ligado ao usuário do Supabase Auth: nome, perfil (`admin` ou `recepcao`) e se está ativo.
+- **`profiles`** — um registro por colaborador: e-mail, senha em hash, nome, perfil (`admin` ou `recepcao`) e se está ativo.
 - **`reservas`** — dados do hóspede, chalé, datas, valores, saldo calculado, situação, quem criou e datas de criação/atualização.
 
 ### Segurança
 
-- A chave secreta do Supabase existe apenas no backend; o frontend usa só a chave pública.
-- As tabelas têm Row Level Security forçado e sem permissão para acesso anônimo: mesmo com a chave pública, o navegador não consegue ler reservas direto do banco.
+- O endereço e a senha do banco (`DATABASE_URL`) e o segredo dos tokens (`JWT_SECRET`) existem apenas no backend. O frontend não tem nenhuma credencial.
+- Senhas são guardadas só como hash (scrypt). Ninguém consegue ler a senha de um colaborador, só redefinir.
+- No login, e-mail inexistente e senha errada têm a mesma resposta, para não revelar quem está cadastrado.
+- Depois de 5 senhas erradas para o mesmo e-mail (ou 30 do mesmo IP) em 15 minutos, o login fica bloqueado por 15 minutos (tabela `tentativas_login`).
+- As respostas da API não ficam em cache e trazem cabeçalhos de proteção (`no-store`, `nosniff`, `DENY`).
 - Os arquivos `.env` não vão para o GitHub (estão no `.gitignore`).
 - Tokens, senhas e chaves não são escritos nos registros de erro da API.
 
@@ -209,17 +220,17 @@ npm install
 npm run dev
 ```
 
-Atenção: rodando localmente, o sistema grava no mesmo banco do site publicado.
+Atenção: se o `backend/.env` usar a mesma `DATABASE_URL` do site, rodar localmente grava no banco do site publicado.
 
 ### 8.2. Testar antes de publicar
 
 ```bash
-cd backend && .venv/bin/python -m pytest -v   # 12 testes da API
+cd backend && .venv/bin/python -m pytest -v   # 23 testes da API
 npm run lint                                  # checagem de tipos do frontend
 npm run build                                 # confirma que o site compila
 ```
 
-Os testes cobrem: cálculo de saldo, bloqueio de valores inválidos, datas, quantidade de pessoas, CPF, bloqueio sem token e bloqueio de perfil inativo.
+Os testes cobrem: cálculo de saldo, bloqueio de valores inválidos, datas, quantidade de pessoas, CPF, bloqueio sem token, bloqueio de perfil inativo, login (senha certa, errada, usuário inexistente ou inativo) e tokens vencidos ou falsos.
 
 ### 8.3. Publicar uma alteração
 
@@ -228,58 +239,57 @@ Os testes cobrem: cálculo de saldo, bloqueio de valores inválidos, datas, quan
 3. A Vercel publica a nova versão. A alteração da tela de login entrou no ar poucos minutos após o push, o que indica publicação automática a cada push na `main`.
 4. Conferir abrindo o site e acessando `/api/health`.
 
-As variáveis de ambiente do site publicado (URL e chaves do Supabase) ficam no painel da Vercel, não no repositório. Se as chaves do Supabase forem trocadas, é preciso atualizá-las lá também.
+As variáveis de ambiente do site publicado (`DATABASE_URL` e `JWT_SECRET`) ficam no painel da Vercel, não no repositório. A `DATABASE_URL` é criada automaticamente quando o banco Neon é ligado ao projeto pela aba **Storage**.
 
 ### 8.4. Cadastrar um novo colaborador
 
-Não existe tela de cadastro de usuários; é feito no painel do Supabase.
+Não existe tela de cadastro de usuários; é feito por comando, na pasta `backend`, com a `DATABASE_URL` do Neon no `backend/.env`:
 
-1. **Authentication → Users → Add User**: informar e-mail e senha e marcar *Auto Confirm User*.
-2. Copiar o UID gerado.
-3. No **SQL Editor**, criar o perfil:
-
-```sql
-INSERT INTO public.profiles (id, nome_completo, perfil, ativo)
-VALUES ('UID-DO-USUARIO', 'Nome do Colaborador', 'recepcao', TRUE);
+```bash
+.venv/bin/python manage.py criar-usuario email@exemplo.com "Nome do Colaborador" --perfil recepcao
 ```
 
-Sem o registro em `profiles`, o usuário faz login mas é barrado pela API.
+O comando pede a senha duas vezes (mínimo 8 caracteres). Use `--perfil admin` para administradores. Para ver quem está cadastrado: `manage.py listar-usuarios`.
 
 ### 8.5. Redefinir a senha de um colaborador
 
-No painel do Supabase: **Authentication → Users**, abrir o usuário e definir nova senha. A senha anterior deixa de valer na hora. Não é possível consultar a senha atual — o Supabase guarda apenas o hash.
+```bash
+.venv/bin/python manage.py redefinir-senha email@exemplo.com
+```
+
+A senha anterior deixa de valer na hora. Não é possível consultar a senha atual: o banco guarda apenas o hash.
 
 ### 8.6. Desligar um colaborador
 
-```sql
-UPDATE public.profiles SET ativo = FALSE WHERE id = 'UID-DO-USUARIO';
+```bash
+.venv/bin/python manage.py desativar-usuario email@exemplo.com
 ```
 
-Não apagar o perfil: as reservas criadas por ele continuam vinculadas, e o banco impede a exclusão de quem já criou reservas.
+O acesso é cortado na hora, mesmo que a pessoa esteja logada. Para liberar de novo: `ativar-usuario`. Não apagar o perfil: as reservas criadas por ele continuam vinculadas, e o banco impede a exclusão de quem já criou reservas.
 
 ### 8.7. Alterar a estrutura do banco
 
-Criar um novo arquivo numerado em `supabase/migrations/` (por exemplo `002_...sql`) e executá-lo no SQL Editor do Supabase. Não editar a migration `001` já aplicada.
+Alterar `backend/db/schema.sql` usando comandos que podem rodar mais de uma vez sem apagar dados (`CREATE ... IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN IF NOT EXISTS`) e rodar `manage.py init-db`. Também dá para executar SQL direto no **SQL Editor** do painel do Neon.
 
 ---
 
 ## 9. Modo de demonstração
 
-Se o frontend for executado **sem** as variáveis do Supabase, ele entra em modo de demonstração: aceita contas fictícias, mostra botões de preenchimento rápido na tela de login e usa 5 reservas fictícias guardadas no próprio navegador. Nada disso toca o banco real.
+Se o frontend for executado com `VITE_DEMO_MODE=true`, ele entra em modo de demonstração: aceita contas fictícias, mostra botões de preenchimento rápido na tela de login e usa 5 reservas fictícias guardadas no próprio navegador. Nada disso toca o banco real.
 
-No site publicado e na máquina local o Supabase está configurado, então esse modo fica desligado. As contas e a senha `senha123` citadas no README valem apenas para esse modo.
+No site publicado e na máquina local essa variável não está definida, então esse modo fica desligado. As contas e a senha `senha123` citadas no README valem apenas para esse modo.
 
 ---
 
 ## 10. Pendências e limitações conhecidas
 
-1. **Senha do admin fraca** — a senha atual é simples; trocar por uma forte antes do uso real.
+1. **Dados do Supabase não migrados** — o admin e a reserva antigos ficaram no Supabase pausado. Só voltam se o acesso à conta for recuperado.
 2. **Perfis sem diferença na prática** — `admin` e `recepcao` têm exatamente as mesmas permissões; a API só verifica se o perfil está ativo.
 3. **Sem bloqueio de reserva duplicada** — o sistema aceita duas reservas confirmadas para o mesmo chalé no mesmo período.
-4. **Sem tela de gestão de usuários** — cadastro, senha e desligamento são feitos no painel do Supabase.
+4. **Sem tela de gestão de usuários** — cadastro, senha e desligamento são feitos pelo `manage.py`.
 5. **Lista de chalés fixa no código** — mudar nomes ou quantidade exige alterar o código e publicar.
-6. **Banco único** — testes locais gravam no banco de produção.
-7. **Usuário de teste** — o perfil do admin está com o nome "Administrador (Teste)".
+6. **Banco único** — se o `.env` local usar o banco do site, testes locais gravam no banco de produção (dá para criar um branch de testes no Neon).
+7. **Bloqueio de login por e-mail** — depois de 5 senhas erradas, o e-mail fica bloqueado por 15 minutos, inclusive para o dono da conta. É o preço da proteção contra quem tenta adivinhar senhas.
 8. **Busca feita em memória** — a API carrega todas as reservas e filtra depois; funciona bem com pouco volume, mas deve ser revista se a base crescer.
 9. **README desatualizado** — ainda cita a porta 5000 e não menciona a publicação na Vercel.
 10. **Sobras da base original** — `package.json` com nome `react-example` e dependências não usadas pelo sistema (`@google/genai`, `express`, `motion`).

@@ -1,15 +1,24 @@
 from typing import Any, Optional
-from app.extensions import get_supabase_admin
+from psycopg import sql
+from app.extensions import get_db
+from app.utils.db import serializar_linha
 
 
 class ReservaRepository:
 
-    TABLE_NAME = "reservas"
     COLUMNS = (
         "id, nome_completo, cpf, whatsapp, endereco, numero_chale, "
         "quantidade_pessoas, data_checkin, data_checkout, "
         "valor_total_hospedagem, valor_total_pago, valor_total_receber, "
         "descricao, status, criado_por, created_at, updated_at"
+    )
+
+    # Colunas que a API pode gravar. valor_total_receber é calculado pelo banco.
+    COLUNAS_GRAVAVEIS = (
+        "nome_completo", "cpf", "whatsapp", "endereco", "numero_chale",
+        "quantidade_pessoas", "data_checkin", "data_checkout",
+        "valor_total_hospedagem", "valor_total_pago", "descricao",
+        "status", "criado_por",
     )
 
     @classmethod
@@ -18,18 +27,15 @@ class ReservaRepository:
         busca: Optional[str] = None,
         status: Optional[str] = None,
     ) -> list[dict[str, Any]]:
-        client = get_supabase_admin()
-        query = (
-            client.table(cls.TABLE_NAME)
-            .select(cls.COLUMNS)
-            .order("created_at", desc=True)
-        )
-
+        consulta = f"SELECT {cls.COLUMNS} FROM reservas"
+        parametros: tuple[Any, ...] = ()
         if status in ("confirmada", "cancelada"):
-            query = query.eq("status", status)
+            consulta += " WHERE status = %s"
+            parametros = (status,)
+        consulta += " ORDER BY created_at DESC"
 
-        response = query.execute()
-        registros: list[dict[str, Any]] = response.data or []
+        linhas = get_db().execute(consulta, parametros).fetchall()
+        registros: list[dict[str, Any]] = [serializar_linha(l) for l in linhas]
 
         if busca and busca.strip():
             termo = busca.strip().lower()
@@ -66,61 +72,63 @@ class ReservaRepository:
 
     @classmethod
     def buscar_por_id(cls, reserva_id: str) -> Optional[dict[str, Any]]:
-        client = get_supabase_admin()
-        response = (
-            client.table(cls.TABLE_NAME)
-            .select(cls.COLUMNS)
-            .eq("id", reserva_id)
-            .limit(1)
-            .execute()
+        linha = (
+            get_db()
+            .execute(
+                f"SELECT {cls.COLUMNS} FROM reservas WHERE id = %s LIMIT 1",
+                (reserva_id,),
+            )
+            .fetchone()
         )
-        dados = response.data or []
-        return dados[0] if dados else None
+        return serializar_linha(linha)
+
+    @classmethod
+    def _filtrar_colunas(cls, dados: dict[str, Any]) -> dict[str, Any]:
+        return {k: v for k, v in dados.items() if k in cls.COLUNAS_GRAVAVEIS}
 
     @classmethod
     def criar(cls, dados_insercao: dict[str, Any]) -> dict[str, Any]:
-        payload_db = {
-            k: v
-            for k, v in dados_insercao.items()
-            if k not in ("valor_total_receber", "valor_total_receber_calculado")
-        }
-        client = get_supabase_admin()
-        response = client.table(cls.TABLE_NAME).insert(payload_db).execute()
-        criados = response.data or []
-        return criados[0]
+        dados = cls._filtrar_colunas(dados_insercao)
+        consulta = sql.SQL(
+            "INSERT INTO reservas ({colunas}) VALUES ({valores}) RETURNING {retorno}"
+        ).format(
+            colunas=sql.SQL(", ").join(sql.Identifier(c) for c in dados),
+            valores=sql.SQL(", ").join(sql.Placeholder() for _ in dados),
+            retorno=sql.SQL(cls.COLUMNS),
+        )
+        linha = get_db().execute(consulta, tuple(dados.values())).fetchone()
+        return serializar_linha(linha)
 
     @classmethod
     def atualizar(cls, reserva_id: str, dados_atualizacao: dict[str, Any]) -> dict[str, Any]:
-        payload_db = {
+        dados = {
             k: v
-            for k, v in dados_atualizacao.items()
-            if k
-            not in (
-                "id",
-                "criado_por",
-                "created_at",
-                "valor_total_receber",
-                "valor_total_receber_calculado",
-            )
+            for k, v in cls._filtrar_colunas(dados_atualizacao).items()
+            if k != "criado_por"
         }
-        client = get_supabase_admin()
-        response = (
-            client.table(cls.TABLE_NAME)
-            .update(payload_db)
-            .eq("id", reserva_id)
-            .execute()
+        consulta = sql.SQL(
+            "UPDATE reservas SET {campos} WHERE id = %s RETURNING {retorno}"
+        ).format(
+            campos=sql.SQL(", ").join(
+                sql.SQL("{} = %s").format(sql.Identifier(c)) for c in dados
+            ),
+            retorno=sql.SQL(cls.COLUMNS),
         )
-        atualizados = response.data or []
-        return atualizados[0]
+        linha = (
+            get_db()
+            .execute(consulta, (*dados.values(), reserva_id))
+            .fetchone()
+        )
+        return serializar_linha(linha)
 
     @classmethod
     def atualizar_status(cls, reserva_id: str, novo_status: str) -> dict[str, Any]:
-        client = get_supabase_admin()
-        response = (
-            client.table(cls.TABLE_NAME)
-            .update({"status": novo_status})
-            .eq("id", reserva_id)
-            .execute()
+        linha = (
+            get_db()
+            .execute(
+                f"UPDATE reservas SET status = %s WHERE id = %s RETURNING {cls.COLUMNS}",
+                (novo_status, reserva_id),
+            )
+            .fetchone()
         )
-        atualizados = response.data or []
-        return atualizados[0]
+        return serializar_linha(linha)

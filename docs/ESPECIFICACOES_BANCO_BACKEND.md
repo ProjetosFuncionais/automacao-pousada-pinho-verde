@@ -11,21 +11,21 @@ O sistema adota uma arquitetura em três camadas desacopladas com separação es
 ```text
 [ Navegador: React + TypeScript ]
        │
-       ├── 1. Login / Sessão (HTTPS) ────────────► [ Supabase Auth ]
-       │      (Usa apenas SUPABASE_URL e SUPABASE_ANON_KEY)
-       │
+       ├── 1. Login: POST /api/auth/login ───────► [ API REST Python Flask ]
+       │      (e-mail + senha → token JWT)                │
+       │                                                  │
        └── 2. Operações de Reserva + JWT Bearer ─► [ API REST Python Flask ]
                                                           │
-                                                          ├── Valida Token JWT no Supabase Auth
+                                                          ├── Valida a assinatura do token (JWT_SECRET)
                                                           ├── Verifica Profile Ativo (tabela profiles)
                                                           ├── Aplica Regras de Negócio e Validações
-                                                          └── Executa Queries (SUPABASE_SERVICE_ROLE_KEY)
+                                                          └── Executa Queries SQL (DATABASE_URL)
                                                                      │
                                                                      ▼
-                                                       [ Supabase PostgreSQL (RLS Ativo) ]
+                                                       [ PostgreSQL no Neon ]
 ```
 
-**Princípio Central de Segurança:** O frontend utiliza o SDK do Supabase **exclusivamente** para autenticação (`signInWithPassword`, `signOut`, `getSession`). Nenhuma query de banco de dados (`supabase.from('reservas')`) é feita pelo navegador. Todas as operações de negócio trafegam pela API Flask, onde a chave `SUPABASE_SERVICE_ROLE_KEY` fica protegida no servidor.
+**Princípio Central de Segurança:** O navegador conversa **apenas** com a API Flask. Ele nunca acessa o banco diretamente e não conhece nenhuma credencial do banco. A `DATABASE_URL` e o `JWT_SECRET` existem só no servidor.
 
 ---
 
@@ -36,7 +36,7 @@ backend/
 ├── app/
 │   ├── __init__.py                 # Application Factory (create_app) e registro de Blueprints/erros
 │   ├── config.py                   # Carregamento e validação de variáveis de ambiente
-│   ├── extensions.py               # Instanciação segura dos clientes Supabase (Anon e Service Role)
+│   ├── extensions.py               # Conexão com o PostgreSQL (uma por requisição)
 │   ├── middleware/
 │   │   └── auth_middleware.py      # Decorator @require_auth (valida Bearer token e profile ativo)
 │   ├── repositories/
@@ -44,22 +44,28 @@ backend/
 │   │   └── reserva_repository.py   # Operações CRUD e filtros na tabela public.reservas
 │   ├── routes/
 │   │   ├── health_routes.py        # GET /api/health
-│   │   ├── auth_routes.py          # GET /api/me
+│   │   ├── auth_routes.py          # POST /api/auth/login e GET /api/me
 │   │   └── reserva_routes.py       # Rotas /api/reservas, cancelamento e geração de voucher
 │   ├── schemas/
 │   │   └── reserva_schema.py       # Validação de payload, normalização e regras de domínio
 │   ├── services/
+│   │   ├── auth_service.py         # Login: hash de senha (scrypt) e tokens JWT
 │   │   ├── reserva_service.py      # Regras de negócio, cálculo de saldo e orquestração
 │   │   └── voucher_service.py      # Montagem estruturada dos dados e políticas do voucher
 │   └── utils/
+│       ├── db.py                   # Converte tipos do Postgres (UUID, datas, Decimal) para JSON
 │       ├── errors.py               # Exceções customizadas (APIError) e handler JSON padronizado
 │       └── validators.py           # Validação de CPF, telefone, datas e valores monetários
 ├── tests/
 │   ├── conftest.py                 # Fixtures do Pytest, app de teste e mocks de autenticação
 │   ├── test_autenticacao.py        # Testes de proteção de rotas, token ausente/inválido e profile inativo
+│   ├── test_login.py               # Testes de login, senha errada, usuário inativo e tokens
 │   ├── test_calculo_saldo.py       # Testes de cálculo de saldo e limites financeiros
 │   └── test_validacoes_reserva.py  # Testes de datas (checkout > checkin), pessoas > 0 e campos
+├── db/
+│   └── schema.sql                  # Script SQL das tabelas (pode rodar mais de uma vez)
 ├── .env.example                    # Modelo de variáveis de ambiente sem segredos reais
+├── manage.py                       # Comandos: init-db, criar-usuario, redefinir-senha etc.
 ├── requirements.txt                # Dependências Python com versões fixadas
 └── run.py                          # Ponto de entrada para execução do servidor Flask
 ```
@@ -70,20 +76,19 @@ backend/
 
 - **`app/routes/`**: Camada HTTP (Controllers). Recebe requisições JSON, extrai parâmetros de rota/query, chama a camada de `services` e devolve respostas com o status HTTP adequado. Não contém SQL nem regras de negócio complexas.
 - **`app/services/`**: Camada de Regras de Negócio. Garante que reservas canceladas não sejam editadas indevidamente, valida regras financeiras e temporais, calcula indicadores e estrutura o documento de voucher.
-- **`app/repositories/`**: Camada de Persistência (Data Access Layer). Isola chamadas ao SDK Python do Supabase (`table("reservas").select(...)`). Se no futuro o acesso mudar para SQLAlchemy/Psycopg, apenas esta pasta será alterada.
+- **`app/repositories/`**: Camada de Persistência (Data Access Layer). Concentra todo o SQL, executado com `psycopg` (driver PostgreSQL). Se o banco mudar no futuro, apenas esta pasta é alterada.
 - **`app/schemas/`**: Deserialização e validação rigorosa dos dados recebidos nos endpoints `POST` e `PUT`, acumulando erros por campo no dicionário `campos`.
-- **`app/middleware/`**: Interceptação de segurança. Extrai o header `Authorization: Bearer <TOKEN>`, consulta o usuário no Supabase Auth, busca o registro correspondente em `public.profiles` e bloqueia usuários inativos (`403 Forbidden`).
+- **`app/middleware/`**: Interceptação de segurança. Extrai o header `Authorization: Bearer <TOKEN>`, confere a assinatura e a validade do token JWT, busca o registro correspondente em `public.profiles` e bloqueia usuários inativos (`403 Forbidden`).
 - **`app/utils/`**: Funções puras de validação (CPF, datas ISO, valores decimais) e formatação padronizada de erros (`{"erro": ..., "mensagem": ..., "campos": {}}`).
 
 ---
 
 ## 4. Modelo Completo do Banco de Dados
 
-O banco de dados PostgreSQL no Supabase é composto por duas tabelas no schema `public`, integradas à tabela nativa `auth.users`:
+O banco de dados PostgreSQL (hospedado no Neon) é composto por duas tabelas no schema `public`:
 
-1. **`auth.users`** (Gerenciada pelo Supabase Auth)
-2. **`public.profiles`** (Dados funcionais do colaborador da pousada)
-3. **`public.reservas`** (Registros de reservas e hospedagens dos chalés)
+1. **`public.profiles`** (Colaboradores da pousada: login, senha em hash e perfil)
+2. **`public.reservas`** (Registros de reservas e hospedagens dos chalés)
 
 ---
 
@@ -93,7 +98,9 @@ O banco de dados PostgreSQL no Supabase é composto por duas tabelas no schema `
 
 | Coluna | Tipo | Nulo? | Padrão | Descrição / Regras |
 | :--- | :--- | :--- | :--- | :--- |
-| `id` | `UUID` | Não | — | **PK** e **FK** para `auth.users(id) ON DELETE CASCADE`. |
+| `id` | `UUID` | Não | `gen_random_uuid()` | **PK**. Identificador do colaborador. |
+| `email` | `VARCHAR(255)` | Não | — | E-mail de login. Único, sem diferenciar maiúsculas (`lower(email)`). |
+| `senha_hash` | `TEXT` | Sim | — | Hash scrypt da senha. A senha em texto nunca é gravada. |
 | `nome_completo` | `VARCHAR(150)` | Não | — | Nome completo do colaborador (mínimo 3 caracteres). |
 | `perfil` | `VARCHAR(20)` | Não | `'recepcao'` | `CHECK (perfil IN ('admin', 'recepcao'))`. |
 | `ativo` | `BOOLEAN` | Não | `TRUE` | Define se o funcionário possui acesso liberado à API. |
@@ -125,7 +132,6 @@ O banco de dados PostgreSQL no Supabase é composto por duas tabelas no schema `
 
 ## 6. Relacionamentos
 
-- **`auth.users (1) ─── (1) public.profiles`**: Todo funcionário cadastrado no Supabase Auth possui um registro correspondente em `public.profiles` compartilhando o mesmo `id` (UUID).
 - **`public.profiles (1) ─── (N) public.reservas`**: Um funcionário (`profiles.id`) pode cadastrar várias reservas (`reservas.criado_por`). A cláusula `ON DELETE RESTRICT` impede a exclusão física de um perfil que já tenha emitido reservas; em caso de desligamento do colaborador, altera-se `profiles.ativo = FALSE`.
 
 ---
@@ -152,10 +158,9 @@ O banco de dados PostgreSQL no Supabase é composto por duas tabelas no schema `
 
 ## 8. SQL Utilizado na Migration
 
-O script completo encontra-se em `supabase/migrations/001_initial_schema.sql`. Os pontos principais incluem:
+O script completo encontra-se em `backend/db/schema.sql` e é aplicado com `python manage.py init-db`. Os pontos principais incluem:
 
 ```sql
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 CREATE EXTENSION IF NOT EXISTS "pg_trgm";
 
 -- Coluna gerada automaticamente na tabela public.reservas:
@@ -178,6 +183,7 @@ CONSTRAINT chk_reservas_status_valido CHECK ( status IN ('confirmada', 'cancelad
 | Método | Rota | Autenticação | Descrição | Códigos HTTP |
 | :--- | :--- | :--- | :--- | :--- |
 | `GET` | `/api/health` | Pública | Verifica disponibilidade da API. | `200` |
+| `POST` | `/api/auth/login` | Pública | Recebe `email` e `password` e devolve o token JWT e os dados do colaborador. | `200`, `401`, `403`, `422`, `429` |
 | `GET` | `/api/me` | Bearer Token | Retorna dados do usuário autenticado e seu `profile`. | `200`, `401`, `403` |
 | `GET` | `/api/reservas` | Bearer Token | Lista reservas com busca (`?busca=`) e filtro (`?status=`). | `200`, `401`, `403` |
 | `GET` | `/api/reservas/<id>` | Bearer Token | Retorna detalhes de uma reserva específica por UUID. | `200`, `400`, `401`, `404` |
@@ -249,15 +255,19 @@ CONSTRAINT chk_reservas_status_valido CHECK ( status IN ('confirmada', 'cancelad
 
 ## 11. Autenticação e Autorização
 
-1. O funcionário realiza login no React usando `supabase.auth.signInWithPassword({ email, password })`.
-2. O Supabase Auth devolve um `session.access_token` (JWT assinado).
-3. O frontend inclui o cabeçalho `Authorization: Bearer <access_token>` em todas as chamadas para a API Flask.
-4. No Flask, o decorator `@require_auth`:
+1. O funcionário informa e-mail e senha no React, que envia `POST /api/auth/login`.
+2. O Flask busca o colaborador em `public.profiles` e confere a senha com o hash salvo (`werkzeug.security`, scrypt).
+   - E-mail inexistente ou senha errada devolvem a mesma resposta (`401`, `credenciais_invalidas`).
+   - Perfil inativo devolve `403` (`usuario_inativo`).
+3. Se estiver tudo certo, o Flask devolve um token JWT (HS256, assinado com `JWT_SECRET`, válido por `JWT_EXPIRES_HOURS` horas, padrão 12).
+4. O frontend guarda o token no `localStorage` e o envia como `Authorization: Bearer <token>` em todas as chamadas.
+5. No Flask, o decorator `@require_auth`:
    - Verifica a presença e formato do cabeçalho `Authorization`.
-   - Valida o token junto ao Supabase Auth (`supabase.auth.get_user(token)`).
-   - Consulta `public.profiles` pelo `user.id`.
-   - Caso o perfil não exista ou esteja com `ativo = False`, retorna `403 Forbidden` com o código `"usuario_inativo"`.
+   - Confere a assinatura e a validade do token.
+   - Consulta `public.profiles` pelo `id` do token.
+   - Caso o perfil não exista ou esteja com `ativo = False`, retorna `403 Forbidden` com o código `"usuario_inativo"`. Assim, desativar um colaborador corta o acesso na hora, mesmo com token ainda válido.
    - Injeta o usuário autenticado em `g.current_user` para uso nas rotas e serviços (ex.: preencher `criado_por`).
+6. Se a API responder `401` (token expirado ou inválido), o frontend apaga o token e volta para a tela de login.
 
 ---
 
@@ -267,14 +277,13 @@ CONSTRAINT chk_reservas_status_valido CHECK ( status IN ('confirmada', 'cancelad
 - `FLASK_ENV`: Ambiente de execução (`development` ou `production`).
 - `PORT`: Porta HTTP do servidor Flask (padrão `5000`).
 - `CORS_ORIGINS`: Origens permitidas no CORS (ex.: `http://localhost:3000,http://localhost:5173`).
-- `SUPABASE_URL`: URL do projeto no Supabase.
-- `SUPABASE_ANON_KEY`: Chave pública anônima do Supabase.
-- `SUPABASE_SERVICE_ROLE_KEY`: Chave secreta de administração (uso exclusivo no backend Flask).
+- `DATABASE_URL`: Connection string do PostgreSQL no Neon. A integração Neon da Vercel cria essa variável sozinha (o backend também aceita `POSTGRES_URL`).
+- `JWT_SECRET`: Segredo longo e aleatório (mínimo 32 caracteres) que assina os tokens de login. Trocar esse valor desconecta todos os usuários.
+- `JWT_EXPIRES_HOURS`: Duração do login em horas (padrão `12`).
 
 ### Frontend (`frontend/.env.example`)
-- `VITE_SUPABASE_URL`: URL do projeto no Supabase.
-- `VITE_SUPABASE_ANON_KEY`: Chave pública anônima do Supabase.
-- `VITE_API_BASE_URL`: URL da API Flask (ex.: `http://localhost:5000/api`).
+- `VITE_API_BASE_URL`: URL da API Flask (ex.: `http://localhost:5001/api`; no site publicado, `/api`).
+- `VITE_DEMO_MODE`: `true` liga o modo demonstração (dados fictícios no navegador, sem backend). Padrão desligado.
 
 ---
 
@@ -295,6 +304,7 @@ Principais códigos de erro padronizados:
 - `nao_autenticado` (`401`): Token Bearer ausente, expirado ou inválido.
 - `usuario_inativo` (`403`): Funcionário sem perfil ativo na tabela `profiles`.
 - `nao_encontrado` (`404`): Reserva ou recurso não localizado.
+- `muitas_tentativas` (`429`): Login bloqueado temporariamente após muitas senhas erradas.
 - `conflito_estado` (`409`): Tentativa de cancelar ou alterar reserva já cancelada.
 - `erro_validacao` (`422`): Violação de regras de negócio ou campos obrigatórios.
 - `erro_interno` (`500`): Falha inesperada tratada com segurança sem expor stacktraces ou segredos.
@@ -303,8 +313,11 @@ Principais códigos de erro padronizados:
 
 ## 14. Medidas de Segurança
 
-- **Isolamento da `SUPABASE_SERVICE_ROLE_KEY`**: Presente apenas no `.env` do backend Flask.
-- **Row Level Security (RLS) Forçado**: `FORCE ROW LEVEL SECURITY` e `REVOKE ALL ON public.reservas FROM anon` garantem que a tabela `reservas` seja inacessível diretamente pelo navegador.
+- **Credenciais só no servidor**: `DATABASE_URL` e `JWT_SECRET` existem apenas no backend. O navegador nunca fala com o banco.
+- **Senhas em hash**: Senhas são guardadas com scrypt (`werkzeug.security`); nem o administrador consegue ler a senha de alguém, só redefinir.
+- **Mensagem única no login**: E-mail inexistente e senha errada têm a mesma resposta e o mesmo tempo de verificação, para não revelar quais e-mails estão cadastrados.
+- **Bloqueio de tentativas**: 5 falhas de login por e-mail ou 30 por IP em 15 minutos bloqueiam novas tentativas por 15 minutos (`429`, `muitas_tentativas`). As falhas ficam na tabela `tentativas_login` e são apagadas depois de 1 dia.
+- **Cabeçalhos de segurança**: Toda resposta da API sai com `Cache-Control: no-store`, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY` e `Referrer-Policy: no-referrer`.
 - **Higiene de Logs**: O middleware e os handlers de exceção nunca registram o conteúdo do header `Authorization`, tokens JWT, senhas ou chaves de serviço.
 - **Dupla Validação**: Todas as validações feitas com Zod no frontend são integralmente repetidas no backend Python antes de qualquer operação no banco.
 - **Imutabilidade Contábil**: O campo `valor_total_receber` é ignorado caso enviado no payload e calculado exclusivamente pelo banco/serviço.
@@ -319,7 +332,8 @@ cd backend
 python -m venv .venv
 source .venv/bin/activate  # No Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-cp .env.example .env       # Preencher com as credenciais do projeto Supabase
+cp .env.example .env       # Preencher DATABASE_URL (Neon) e JWT_SECRET
+python manage.py init-db   # Cria as tabelas
 python run.py
 ```
 
@@ -327,31 +341,24 @@ python run.py
 ```bash
 # Na raiz ou dentro da pasta frontend/
 npm install
-cp .env.example .env       # Preencher VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY e VITE_API_BASE_URL
+cp frontend/.env.example .env   # Preencher VITE_API_BASE_URL
 npm run dev
 ```
 
 ---
 
-## 16. Como Criar o Primeiro Usuário no Supabase
+## 16. Como Criar o Primeiro Usuário
 
-1. Acesse o painel do seu projeto no **Supabase Dashboard**.
-2. Vá em **SQL Editor**, cole o conteúdo de `supabase/migrations/001_initial_schema.sql` e clique em **Run**.
-3. Vá em **Authentication → Users → Add User → Create New User**:
-   - Informe o e-mail (ex.: `recepcao@pousadapinhoverde.com.br`) e uma senha forte.
-   - Marque a opção **Auto Confirm User** e crie o usuário.
-   - Copie o **User UID** gerado (ex.: `a1b2c3d4-e5f6-7890-abcd-ef1234567890`).
-4. Volte ao **SQL Editor** e crie o perfil ativo desse funcionário na tabela `public.profiles`:
+Com a `DATABASE_URL` do Neon no `backend/.env`:
 
-```sql
-INSERT INTO public.profiles (id, nome_completo, perfil, ativo)
-VALUES (
-    'COLE-AQUI-O-UUID-DO-USUARIO',
-    'Ana Clara Ribeiro (Recepção)',
-    'admin',
-    TRUE
-);
+```bash
+cd backend
+.venv/bin/python manage.py init-db
+.venv/bin/python manage.py criar-usuario admin@pousadapinhoverde.com.br "Nome do Administrador" --perfil admin
+# O comando pede a senha (mínimo 8 caracteres) duas vezes.
 ```
+
+Outros comandos: `listar-usuarios`, `redefinir-senha EMAIL`, `desativar-usuario EMAIL`, `ativar-usuario EMAIL`.
 
 ---
 
@@ -366,10 +373,15 @@ pytest -v
 ### Testar manualmente via cURL
 ```bash
 # 1. Healthcheck
-curl -i http://localhost:5000/api/health
+curl -i http://localhost:5001/api/health
 
-# 2. Listar reservas (substitua SEU_TOKEN_JWT)
-curl -i -H "Authorization: Bearer SEU_TOKEN_JWT" http://localhost:5000/api/reservas
+# 2. Login (devolve o token)
+curl -i -X POST -H "Content-Type: application/json" \
+  -d '{"email":"admin@pousadapinhoverde.com.br","password":"SUA_SENHA"}' \
+  http://localhost:5001/api/auth/login
+
+# 3. Listar reservas (substitua SEU_TOKEN_JWT)
+curl -i -H "Authorization: Bearer SEU_TOKEN_JWT" http://localhost:5001/api/reservas
 ```
 
 ---

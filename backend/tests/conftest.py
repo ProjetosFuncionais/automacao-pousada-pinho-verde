@@ -1,9 +1,11 @@
 import pytest
 from app import create_app
+from app.config import Config
 
 
 @pytest.fixture()
-def app():
+def app(monkeypatch):
+    monkeypatch.setattr(Config, "JWT_SECRET", "segredo-de-teste-com-mais-de-32-caracteres")
     flask_app = create_app(testing=True)
     yield flask_app
 

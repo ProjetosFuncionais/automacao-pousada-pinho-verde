@@ -1,4 +1,3 @@
-import { isSupabaseConfigured, supabase } from './supabaseClient';
 import {
   ApiErrorResponse,
   Profile,
@@ -21,6 +20,32 @@ const API_BASE_URL =
 
 const STORAGE_KEY_RESERVAS = 'pinho_verde_reservas_v1';
 const STORAGE_KEY_SESSION = 'pinho_verde_demo_session_v1';
+const STORAGE_KEY_TOKEN = 'pinho_verde_token_v1';
+
+// Modo demonstração: só quando VITE_DEMO_MODE=true. Usa dados fictícios no navegador.
+export const isDemoMode = import.meta.env.VITE_DEMO_MODE === 'true';
+
+export const EVENTO_SESSAO_EXPIRADA = 'pinho-verde:sessao-expirada';
+
+export function obterTokenSalvo(): string | null {
+  try {
+    return localStorage.getItem(STORAGE_KEY_TOKEN);
+  } catch {
+    return null;
+  }
+}
+
+export function salvarToken(token: string | null): void {
+  try {
+    if (token) {
+      localStorage.setItem(STORAGE_KEY_TOKEN, token);
+    } else {
+      localStorage.removeItem(STORAGE_KEY_TOKEN);
+    }
+  } catch {
+    // Navegador sem acesso ao armazenamento: a sessão dura só até recarregar.
+  }
+}
 
 export const POLITICAS_OFICIAIS_VOUCHER: string[] = [
   'Reembolso integral para cancelamento solicitado até 14 dias antes do check-in.',
@@ -203,9 +228,8 @@ export function salvarSessaoDemoLocal(profile: Profile | null): void {
 }
 
 async function obterAccessToken(): Promise<string> {
-  if (isSupabaseConfigured && supabase) {
-    const { data } = await supabase.auth.getSession();
-    const token = data.session?.access_token;
+  if (!isDemoMode) {
+    const token = obterTokenSalvo();
     if (!token) {
       throw new ApiClientError(
         401,
@@ -253,6 +277,10 @@ async function requestFlaskApi<T>(
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
+    if (response.status === 401) {
+      salvarToken(null);
+      window.dispatchEvent(new Event(EVENTO_SESSAO_EXPIRADA));
+    }
     const errPayload = data as Partial<ApiErrorResponse>;
     throw new ApiClientError(
       response.status,
@@ -303,8 +331,31 @@ function validarPayloadSimulandoBackend(payload: ReservaPayload): ReservaPayload
 }
 
 export const apiService = {
+  async login(email: string, password: string): Promise<Profile> {
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      const errPayload = data as Partial<ApiErrorResponse>;
+      throw new ApiClientError(
+        response.status,
+        errPayload.erro || 'erro_requisicao',
+        errPayload.mensagem || 'Não foi possível fazer login. Tente novamente.',
+        errPayload.campos || {}
+      );
+    }
+
+    const { token, usuario } = data as { token: string; usuario: Profile };
+    salvarToken(token);
+    return usuario;
+  },
+
   async getMe(): Promise<Profile> {
-    if (isSupabaseConfigured) {
+    if (!isDemoMode) {
       return requestFlaskApi<Profile>('/me');
     }
     const profile = obterSessaoDemoLocal();
@@ -329,7 +380,7 @@ export const apiService = {
     busca?: string;
     status?: StatusReserva | 'todas';
   }): Promise<Reserva[]> {
-    if (isSupabaseConfigured) {
+    if (!isDemoMode) {
       const params = new URLSearchParams();
       if (filtros?.busca?.trim()) params.set('busca', filtros.busca.trim());
       if (filtros?.status && filtros.status !== 'todas') {
@@ -381,7 +432,7 @@ export const apiService = {
   },
 
   async obterReservaPorId(id: string): Promise<Reserva> {
-    if (isSupabaseConfigured) {
+    if (!isDemoMode) {
       return requestFlaskApi<Reserva>(`/reservas/${encodeURIComponent(id)}`);
     }
 
@@ -399,7 +450,7 @@ export const apiService = {
   },
 
   async criarReserva(payload: ReservaPayload): Promise<Reserva> {
-    if (isSupabaseConfigured) {
+    if (!isDemoMode) {
       return requestFlaskApi<Reserva>('/reservas', {
         method: 'POST',
         body: JSON.stringify(payload),
@@ -443,7 +494,7 @@ export const apiService = {
   },
 
   async atualizarReserva(id: string, payload: ReservaPayload): Promise<Reserva> {
-    if (isSupabaseConfigured) {
+    if (!isDemoMode) {
       return requestFlaskApi<Reserva>(`/reservas/${encodeURIComponent(id)}`, {
         method: 'PUT',
         body: JSON.stringify(payload),
@@ -498,7 +549,7 @@ export const apiService = {
   },
 
   async cancelarReserva(id: string): Promise<Reserva> {
-    if (isSupabaseConfigured) {
+    if (!isDemoMode) {
       return requestFlaskApi<Reserva>(
         `/reservas/${encodeURIComponent(id)}/cancelar`,
         {
@@ -538,7 +589,7 @@ export const apiService = {
   },
 
   async obterVoucher(id: string): Promise<VoucherData> {
-    if (isSupabaseConfigured) {
+    if (!isDemoMode) {
       return requestFlaskApi<VoucherData>(
         `/reservas/${encodeURIComponent(id)}/voucher`
       );

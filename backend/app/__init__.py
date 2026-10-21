@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_cors import CORS
 from app.config import Config
+from app.extensions import init_db
 from app.routes.auth_routes import auth_bp
 from app.routes.health_routes import health_bp
 from app.routes.reserva_routes import reserva_bp
@@ -27,6 +28,16 @@ def create_app(testing: bool = False) -> Flask:
     )
 
     register_error_handlers(app)
+    init_db(app)
+
+    @app.after_request
+    def cabecalhos_de_seguranca(resposta):
+        # Dados de hóspedes não devem ficar guardados em cache de navegador ou proxy.
+        resposta.headers["Cache-Control"] = "no-store"
+        resposta.headers["X-Content-Type-Options"] = "nosniff"
+        resposta.headers["X-Frame-Options"] = "DENY"
+        resposta.headers["Referrer-Policy"] = "no-referrer"
+        return resposta
 
     app.register_blueprint(health_bp)
     app.register_blueprint(auth_bp)

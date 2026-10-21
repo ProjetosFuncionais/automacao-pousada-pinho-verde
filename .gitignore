@@ -14,3 +14,7 @@ __pycache__/
 venv/
 .pytest_cache/
 
+
+# Configuração local da Vercel e cache do graphify
+.vercel/
+graphify-out/

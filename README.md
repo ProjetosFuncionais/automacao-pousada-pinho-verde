@@ -7,7 +7,7 @@ Sistema web full stack desenvolvido para a recepção e administração da **Pou
 ## 1. Objetivo do Projeto
 
 Centralizar a operação diária de reservas da Pousada Pinho Verde garantindo:
-- Autenticação segura de funcionários via **Supabase Auth** com verificação de perfil ativo (`admin` ou `recepcao`).
+- Login próprio de funcionários (senha em hash + token JWT) com verificação de perfil ativo (`admin` ou `recepcao`).
 - Cadastro e atualização de reservas com máscaras de CPF, WhatsApp e moeda (`R$`).
 - Cálculo automático e imutável do saldo a receber (`valor_total_receber = valor_total_hospedagem - valor_total_pago`).
 - Emissão de voucher oficial contendo todas as políticas de hospedagem, pagamento e cancelamento da pousada.
@@ -22,18 +22,18 @@ Centralizar a operação diária de reservas da Pousada Pinho Verde garantindo:
 - **React Router DOM** (roteamento protegido)
 - **React Hook Form** + **Zod** (validação de formulários e regras de negócio)
 - **Tailwind CSS** (estilização responsiva e folha de impressão `@media print`)
-- **@supabase/supabase-js** (utilizado exclusivamente para autenticação e gestão de sessão)
 
 ### Backend
 - **Python 3.11+** com **Flask** (API REST)
 - **Flask-CORS** (controle de origens permitidas)
 - **python-dotenv** (gerenciamento de variáveis de ambiente)
-- **supabase** (SDK Python oficial com `SUPABASE_SERVICE_ROLE_KEY` restrita ao servidor)
+- **psycopg** (driver PostgreSQL, com `DATABASE_URL` restrita ao servidor)
+- **PyJWT** + **werkzeug.security** (tokens de login e hash de senha)
 - **Pytest** (suíte de testes automatizados de saldo, datas, validações e autenticação)
 
 ### Banco de Dados e Autenticação
-- **Supabase PostgreSQL** (com Row Level Security habilitado e coluna `GENERATED ALWAYS` para o saldo)
-- **Supabase Auth** (JWT Bearer Token)
+- **PostgreSQL no Neon** (plano gratuito, ligado à Vercel; coluna `GENERATED ALWAYS` para o saldo)
+- **Login pela própria API Flask** (JWT Bearer Token)
 
 ---
 
@@ -47,7 +47,7 @@ Centralizar a operação diária de reservas da Pousada Pinho Verde garantindo:
 │   │   ├── Layout.tsx                     # Sidebar, cabeçalho e estrutura de página
 │   │   └── ProtectedRoute.tsx             # Proteção de rotas para usuários autenticados e ativos
 │   ├── hooks/
-│   │   └── useAuth.tsx                    # Contexto de sessão Supabase Auth + validação de profile
+│   │   └── useAuth.tsx                    # Contexto de sessão (token JWT) + validação de profile
 │   ├── pages/
 │   │   ├── AccessDeniedOrNotFoundPage.tsx # Telas 403 (Acesso Negado) e 404 (Não Encontrado)
 │   │   ├── DashboardPage.tsx              # Resumo financeiro e reservas recentes
@@ -59,8 +59,7 @@ Centralizar a operação diária de reservas da Pousada Pinho Verde garantindo:
 │   ├── schemas/
 │   │   └── reservaSchema.ts               # Schemas Zod para login e reserva
 │   ├── services/
-│   │   ├── api.ts                         # Cliente HTTP para a API Flask com Bearer Token
-│   │   └── supabaseClient.ts              # Inicialização do Supabase Auth no cliente
+│   │   └── api.ts                         # Cliente HTTP para a API Flask (login e Bearer Token)
 │   ├── types/
 │   │   └── reserva.ts                     # Interfaces TypeScript (Reserva, Profile, VoucherData)
 │   ├── utils/
@@ -79,12 +78,13 @@ Centralizar a operação diária de reservas da Pousada Pinho Verde garantindo:
 │   │   │   ├── profile_repository.py      # Acesso à tabela public.profiles
 │   │   │   └── reserva_repository.py      # Acesso à tabela public.reservas
 │   │   ├── routes/
-│   │   │   ├── auth_routes.py             # GET /api/me
+│   │   │   ├── auth_routes.py             # POST /api/auth/login e GET /api/me
 │   │   │   ├── health_routes.py           # GET /api/health
 │   │   │   └── reserva_routes.py          # CRUD /api/reservas, cancelar e voucher
 │   │   ├── schemas/
 │   │   │   └── reserva_schema.py          # Validações de payload no servidor
 │   │   ├── services/
+│   │   │   ├── auth_service.py            # Hash de senha e tokens JWT
 │   │   │   ├── reserva_service.py         # Regras de negócio de reservas
 │   │   │   └── voucher_service.py         # Montagem do voucher e políticas da pousada
 │   │   ├── utils/
@@ -92,21 +92,22 @@ Centralizar a operação diária de reservas da Pousada Pinho Verde garantindo:
 │   │   │   └── validators.py              # Validador de CPF, datas, moeda e cálculo de saldo
 │   │   ├── __init__.py                    # Application Factory (create_app)
 │   │   ├── config.py                      # Variáveis de ambiente do Flask
-│   │   └── extensions.py                  # Clientes Supabase Admin e Auth
+│   │   └── extensions.py                  # Conexão com o PostgreSQL (Neon)
 │   ├── tests/
 │   │   ├── conftest.py
 │   │   ├── test_autenticacao.py
+│   │   ├── test_login.py
 │   │   ├── test_calculo_saldo.py
 │   │   └── test_validacoes_reserva.py
+│   ├── db/
+│   │   └── schema.sql                     # SQL das tabelas, CHECKs, trigger e índices
 │   ├── .env.example
+│   ├── manage.py                          # init-db, criar-usuario, redefinir-senha etc.
 │   ├── requirements.txt
 │   └── run.py
-├── supabase/
-│   └── migrations/
-│       └── 001_initial_schema.sql         # Migration SQL completa (tabelas, CHECKs, trigger, RLS)
 ├── docs/
+│   ├── DOCUMENTACAO_PROJETO.md            # Visão geral, situação e processos do dia a dia
 │   └── ESPECIFICACOES_BANCO_BACKEND.md    # Documentação arquitetural e dicionário de dados
-├── .env.example
 ├── .gitignore
 ├── index.html
 ├── package.json
@@ -114,4 +115,24 @@ Centralizar a operação diária de reservas da Pousada Pinho Verde garantindo:
 ├── vite.config.ts
 └── README.md
 ```
+
+---
+
+## 4. Como rodar
+
+```bash
+# Backend (porta 5001)
+cd backend
+python -m venv .venv && .venv/bin/pip install -r requirements.txt
+cp .env.example .env                 # preencher DATABASE_URL (Neon) e JWT_SECRET
+.venv/bin/python manage.py init-db   # cria as tabelas
+.venv/bin/python manage.py criar-usuario admin@pousadapinhoverde.com.br "Nome" --perfil admin
+.venv/bin/python run.py
+
+# Frontend (porta 3000), na raiz
+npm install
+npm run dev
+```
+
+Detalhes de publicação na Vercel e manutenção de usuários: [docs/DOCUMENTACAO_PROJETO.md](docs/DOCUMENTACAO_PROJETO.md).
 
