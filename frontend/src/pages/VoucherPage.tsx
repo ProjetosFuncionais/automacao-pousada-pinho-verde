@@ -290,8 +290,7 @@ export const VoucherPage: React.FC = () => {
           </p>
         </section>
 
-        <footer className="no-print pt-6 border-t border-slate-300 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-500 tabular-nums">
-          <span className="break-all sm:break-normal">ID da Reserva: {reserva.id}</span>
+        <footer className="no-print pt-6 border-t border-slate-300 text-xs text-slate-500 tabular-nums">
           <span>
             Emitido em {formatarDataHoraBR(voucher.emitido_em)} por{' '}
             {voucher.emitido_por}
