@@ -61,6 +61,13 @@ export interface VoucherData {
   politicas: string[];
 }
 
+export interface NovoUsuarioPayload {
+  email: string;
+  nome_completo: string;
+  perfil: PerfilUsuario;
+  senha: string;
+}
+
 export interface ApiErrorResponse {
   erro: string;
   mensagem: string;

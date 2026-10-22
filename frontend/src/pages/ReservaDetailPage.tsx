@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
   ArrowLeft,
+  Banknote,
   CheckCircle2,
   Edit3,
   FileText,
@@ -17,9 +18,11 @@ import {
   formatarDataBR,
   formatarDataHoraBR,
   formatarMoedaBRL,
+  montarLinkWhatsappReserva,
   obterCodigoCurtoReserva,
 } from '../utils/formatters';
 import { ConfirmCancelModal } from '../components/ConfirmCancelModal';
+import { RegistrarPagamentoModal } from '../components/RegistrarPagamentoModal';
 import { AccessDeniedOrNotFoundPage } from './AccessDeniedOrNotFoundPage';
 
 export const ReservaDetailPage: React.FC = () => {
@@ -32,6 +35,9 @@ export const ReservaDetailPage: React.FC = () => {
     useState<boolean>(false);
   const [cancelando, setCancelando] = useState<boolean>(false);
   const [avisoSucesso, setAvisoSucesso] = useState<string | null>(null);
+  const [modalPagamentoAberto, setModalPagamentoAberto] = useState(false);
+  const [registrandoPagamento, setRegistrandoPagamento] = useState(false);
+  const [erroPagamento, setErroPagamento] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -75,7 +81,7 @@ export const ReservaDetailPage: React.FC = () => {
       setReserva(atualizada);
       setModalCancelarAberto(false);
       setAvisoSucesso(
-        'Reserva cancelada com sucesso. O registro foi mantido no histórico para fins de auditoria.'
+        'Reserva cancelada. Ela continua no histórico.'
       );
     } catch (err) {
       setErro(
@@ -83,6 +89,28 @@ export const ReservaDetailPage: React.FC = () => {
       );
     } finally {
       setCancelando(false);
+    }
+  };
+
+  const handleRegistrarPagamento = async (valor: number) => {
+    if (!reserva) return;
+    try {
+      setRegistrandoPagamento(true);
+      setErroPagamento(null);
+      const atualizada = await apiService.registrarPagamento(reserva.id, valor);
+      setReserva(atualizada);
+      setModalPagamentoAberto(false);
+      setAvisoSucesso(
+        atualizada.valor_total_receber > 0
+          ? `Pagamento de ${formatarMoedaBRL(valor)} registrado. Ainda faltam ${formatarMoedaBRL(atualizada.valor_total_receber)}.`
+          : `Pagamento de ${formatarMoedaBRL(valor)} registrado. Reserva quitada.`
+      );
+    } catch (err) {
+      setErroPagamento(
+        err instanceof Error ? err.message : 'Não foi possível registrar o pagamento.'
+      );
+    } finally {
+      setRegistrandoPagamento(false);
     }
   };
 
@@ -154,6 +182,28 @@ export const ReservaDetailPage: React.FC = () => {
 
           {reserva.status === 'confirmada' && (
             <>
+              {reserva.valor_total_receber > 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setErroPagamento(null);
+                    setModalPagamentoAberto(true);
+                  }}
+                  className="col-span-2 sm:col-span-1 inline-flex items-center justify-center gap-1.5 px-3.5 py-3 sm:py-2 text-sm sm:text-xs font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 rounded-lg transition-colors whitespace-nowrap cursor-pointer"
+                >
+                  <Banknote className="w-3.5 h-3.5" />
+                  <span>Registrar pagamento</span>
+                </button>
+              )}
+              <a
+                href={montarLinkWhatsappReserva(reserva)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="col-span-2 sm:col-span-1 inline-flex items-center justify-center gap-1.5 px-3.5 py-3 sm:py-2 text-sm sm:text-xs font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg transition-colors whitespace-nowrap"
+              >
+                <MessageCircle className="w-3.5 h-3.5" />
+                <span>Enviar pelo WhatsApp</span>
+              </a>
               <Link
                 to={`/reservas/${reserva.id}/editar`}
                 className="inline-flex items-center justify-center gap-1.5 px-3.5 py-3 sm:py-2 text-sm sm:text-xs font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg transition-colors whitespace-nowrap"
@@ -298,6 +348,15 @@ export const ReservaDetailPage: React.FC = () => {
           <span>Última atualização: {formatarDataHoraBR(reserva.updated_at)}</span>
         </div>
       </div>
+
+      <RegistrarPagamentoModal
+        aberto={modalPagamentoAberto}
+        saldo={reserva.valor_total_receber}
+        carregando={registrandoPagamento}
+        erro={erroPagamento}
+        onConfirmar={handleRegistrarPagamento}
+        onFechar={() => setModalPagamentoAberto(false)}
+      />
 
       <ConfirmCancelModal
         aberto={modalCancelarAberto}

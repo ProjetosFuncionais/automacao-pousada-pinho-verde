@@ -4,10 +4,9 @@ dist/
 coverage/
 .DS_Store
 *.log
+# Nenhum arquivo .env vai para o GitHub (nem os modelos).
 .env*
-!.env.example
-!backend/.env.example
-!frontend/.env.example
+**/.env*
 __pycache__/
 *.py[cod]
 .venv/

@@ -62,3 +62,20 @@ def require_auth(f: Callable) -> Callable:
         return f(*args, **kwargs)
 
     return decorated
+
+
+def require_admin(f: Callable) -> Callable:
+    """Igual ao require_auth, mas só libera usuários com perfil admin."""
+
+    @wraps(f)
+    @require_auth
+    def decorated(*args: Any, **kwargs: Any):
+        if g.current_user.get("perfil") != "admin":
+            raise APIError(
+                erro="acesso_negado",
+                mensagem="Somente administradores podem fazer isso.",
+                status_code=403,
+            )
+        return f(*args, **kwargs)
+
+    return decorated

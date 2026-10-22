@@ -115,3 +115,49 @@ export function obterCodigoCurtoReserva(id: string): string {
   if (!id) return 'PPV-000000';
   return `PPV-${id.split('-')[0].toUpperCase()}`;
 }
+
+/** Data de hoje no fuso do navegador, no formato AAAA-MM-DD. */
+export function hojeLocalIso(deslocamentoDias = 0): string {
+  const d = new Date();
+  d.setDate(d.getDate() + deslocamentoDias);
+  const mes = String(d.getMonth() + 1).padStart(2, '0');
+  const dia = String(d.getDate()).padStart(2, '0');
+  return `${d.getFullYear()}-${mes}-${dia}`;
+}
+
+/** Link do WhatsApp do hóspede com um resumo da reserva já escrito. */
+export function montarLinkWhatsappReserva(reserva: {
+  id: string;
+  nome_completo: string;
+  whatsapp: string;
+  numero_chale: string;
+  quantidade_pessoas: number;
+  data_checkin: string;
+  data_checkout: string;
+  valor_total_hospedagem: number;
+  valor_total_pago: number;
+  valor_total_receber: number;
+}): string {
+  const primeiroNome = reserva.nome_completo.trim().split(/\s+/)[0];
+  const linhas = [
+    `Olá, ${primeiroNome}! Sua reserva na Pousada Pinho Verde está confirmada.`,
+    '',
+    `Código: ${obterCodigoCurtoReserva(reserva.id)}`,
+    `Chalé: ${reserva.numero_chale}`,
+    `Check-in: ${formatarDataBR(reserva.data_checkin)} a partir das 15h`,
+    `Check-out: ${formatarDataBR(reserva.data_checkout)} até as 12h`,
+    `Hóspedes: ${reserva.quantidade_pessoas}`,
+    '',
+    `Valor total: ${formatarMoedaBRL(reserva.valor_total_hospedagem)}`,
+    `Já pago: ${formatarMoedaBRL(reserva.valor_total_pago)}`,
+  ];
+  if (reserva.valor_total_receber > 0) {
+    linhas.push(
+      `A pagar no check-in: ${formatarMoedaBRL(reserva.valor_total_receber)} (PIX, dinheiro ou cartão em até 2x)`
+    );
+  }
+  linhas.push('', 'Qualquer dúvida, é só responder esta mensagem. Até breve!');
+
+  const numero = extrairDigitos(reserva.whatsapp);
+  return `https://wa.me/55${numero}?text=${encodeURIComponent(linhas.join('\n'))}`;
+}

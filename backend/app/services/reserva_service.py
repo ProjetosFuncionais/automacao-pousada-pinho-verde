@@ -3,7 +3,12 @@ from decimal import Decimal
 from app.repositories.reserva_repository import ReservaRepository
 from app.schemas.reserva_schema import validar_payload_reserva
 from app.utils.errors import APIError
-from app.utils.validators import calcular_saldo_receber, parse_decimal_monetario, validar_uuid
+from app.utils.validators import (
+    calcular_saldo_receber,
+    formatar_data_br,
+    parse_decimal_monetario,
+    validar_uuid,
+)
 
 
 class ReservaService:
@@ -18,6 +23,29 @@ class ReservaService:
         copia["valor_total_pago"] = float(pago)
         copia["valor_total_receber"] = float(saldo)
         return copia
+
+    @staticmethod
+    def _garantir_chale_livre(dados: dict[str, Any], ignorar_id: Optional[str] = None) -> None:
+        conflito = ReservaRepository.buscar_conflito(
+            dados["numero_chale"],
+            dados["data_checkin"],
+            dados["data_checkout"],
+            ignorar_id,
+        )
+        if not conflito:
+            return
+        mensagem = (
+            f"{conflito['numero_chale']} já está reservado de "
+            f"{formatar_data_br(conflito['data_checkin'])} a "
+            f"{formatar_data_br(conflito['data_checkout'])} "
+            f"para {conflito['nome_completo']}."
+        )
+        raise APIError(
+            erro="chale_indisponivel",
+            mensagem=mensagem,
+            status_code=409,
+            campos={"numero_chale": mensagem},
+        )
 
     @classmethod
     def listar_reservas(
@@ -50,6 +78,7 @@ class ReservaService:
     @classmethod
     def criar_reserva(cls, payload: Any, usuario_id: str) -> dict[str, Any]:
         dados_validados = validar_payload_reserva(payload)
+        cls._garantir_chale_livre(dados_validados)
         dados_para_banco = {
             **dados_validados,
             "status": "confirmada",
@@ -69,6 +98,7 @@ class ReservaService:
             )
 
         dados_validados = validar_payload_reserva(payload)
+        cls._garantir_chale_livre(dados_validados, ignorar_id=reserva_id)
         atualizada = ReservaRepository.atualizar(reserva_id, dados_validados)
         return cls._garantir_saldo_consistente(atualizada)
 
@@ -84,3 +114,39 @@ class ReservaService:
 
         cancelada = ReservaRepository.atualizar_status(reserva_id, "cancelada")
         return cls._garantir_saldo_consistente(cancelada)
+
+    @classmethod
+    def registrar_pagamento(cls, reserva_id: str, payload: Any) -> dict[str, Any]:
+        atual = cls.obter_reserva_por_id(reserva_id)
+        if atual.get("status") == "cancelada":
+            raise APIError(
+                erro="conflito_estado",
+                mensagem="Não é possível registrar pagamento em uma reserva cancelada.",
+                status_code=409,
+            )
+
+        valor = parse_decimal_monetario((payload or {}).get("valor")) if isinstance(payload, dict) else None
+        saldo = parse_decimal_monetario(atual["valor_total_receber"]) or Decimal("0.00")
+        if valor is None or valor <= Decimal("0.00"):
+            raise APIError(
+                erro="erro_validacao",
+                mensagem="Informe um valor de pagamento maior que zero.",
+                status_code=422,
+                campos={"valor": "Informe um valor maior que zero."},
+            )
+        if valor > saldo:
+            raise APIError(
+                erro="erro_validacao",
+                mensagem="O pagamento não pode ser maior que o saldo a receber.",
+                status_code=422,
+                campos={"valor": "O valor passa do saldo a receber."},
+            )
+
+        atualizada = ReservaRepository.somar_pagamento(reserva_id, float(valor))
+        if not atualizada:
+            raise APIError(
+                erro="conflito_estado",
+                mensagem="A reserva mudou enquanto o pagamento era registrado. Atualize a página.",
+                status_code=409,
+            )
+        return cls._garantir_saldo_consistente(atualizada)

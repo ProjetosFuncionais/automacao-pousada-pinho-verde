@@ -1,3 +1,4 @@
+import React from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './hooks/useAuth';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -9,6 +10,17 @@ import { ReservaFormPage } from './pages/ReservaFormPage';
 import { ReservaDetailPage } from './pages/ReservaDetailPage';
 import { VoucherPage } from './pages/VoucherPage';
 import { AccessDeniedOrNotFoundPage } from './pages/AccessDeniedOrNotFoundPage';
+import { EquipePage } from './pages/EquipePage';
+import { MinhaSenhaPage } from './pages/MinhaSenhaPage';
+import { useAuth } from './hooks/useAuth';
+
+function SomenteAdmin({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
+  if (user?.perfil !== 'admin') {
+    return <AccessDeniedOrNotFoundPage tipo="acesso_negado" />;
+  }
+  return <>{children}</>;
+}
 
 export default function App() {
   return (
@@ -31,6 +43,15 @@ export default function App() {
             <Route path="/reservas/:id/editar" element={<ReservaFormPage />} />
             <Route path="/reservas/:id" element={<ReservaDetailPage />} />
             <Route path="/reservas/:id/voucher" element={<VoucherPage />} />
+            <Route
+              path="/equipe"
+              element={
+                <SomenteAdmin>
+                  <EquipePage />
+                </SomenteAdmin>
+              }
+            />
+            <Route path="/minha-senha" element={<MinhaSenhaPage />} />
             <Route
               path="/acesso-negado"
               element={<AccessDeniedOrNotFoundPage tipo="acesso_negado" />}

@@ -88,3 +88,8 @@ def calcular_saldo_receber(
         Decimal("0.01"), rounding=ROUND_HALF_UP
     )
     return saldo
+
+
+def formatar_data_br(valor: Any) -> str:
+    data = parse_data_iso(valor)
+    return data.strftime("%d/%m/%Y") if data else str(valor)

@@ -48,6 +48,15 @@ def cancelar_reserva(reserva_id: str):
     return jsonify(reserva_cancelada), 200
 
 
+@reserva_bp.post("/<string:reserva_id>/pagamentos")
+@require_auth
+def registrar_pagamento(reserva_id: str):
+    reserva = ReservaService.registrar_pagamento(
+        reserva_id=reserva_id, payload=request.get_json(silent=True)
+    )
+    return jsonify(reserva), 200
+
+
 @reserva_bp.get("/<string:reserva_id>/voucher")
 @require_auth
 def obter_voucher_reserva(reserva_id: str):

@@ -2,10 +2,12 @@ import React from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   CalendarPlus,
+  KeyRound,
   LayoutDashboard,
   ListFilter,
   LogOut,
   Trees,
+  Users,
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
@@ -29,6 +31,8 @@ export const Layout: React.FC = () => {
     if (path.endsWith('/editar')) return 'Editar reserva';
     if (path.endsWith('/voucher')) return 'Voucher';
     if (path.startsWith('/reservas/')) return 'Detalhes da reserva';
+    if (path === '/equipe') return 'Equipe';
+    if (path === '/minha-senha') return 'Minha senha';
     return 'Reservas';
   };
 
@@ -51,7 +55,17 @@ export const Layout: React.FC = () => {
       Icone: CalendarPlus,
       ativo: isNovaReserva,
     },
+    user?.perfil === 'admin'
+      ? { to: '/equipe', rotulo: 'Equipe', Icone: Users, ativo: path === '/equipe' }
+      : { to: '/minha-senha', rotulo: 'Senha', Icone: KeyRound, ativo: path === '/minha-senha' },
   ];
+
+  const classeItemMenu = ({ isActive }: { isActive: boolean }) =>
+    `flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+      isActive
+        ? 'bg-emerald-800/90 text-white'
+        : 'text-emerald-100/80 hover:bg-emerald-900/60 hover:text-white'
+    }`;
 
   return (
     <div className="min-h-screen flex bg-[#F8FAF9] text-slate-900">
@@ -106,6 +120,13 @@ export const Layout: React.FC = () => {
             <CalendarPlus className="w-4 h-4 shrink-0" />
             <span>Nova reserva</span>
           </NavLink>
+
+          {user?.perfil === 'admin' && (
+            <NavLink to="/equipe" className={classeItemMenu}>
+              <Users className="w-4 h-4 shrink-0" />
+              <span>Equipe</span>
+            </NavLink>
+          )}
         </nav>
 
         {user && (
@@ -118,14 +139,23 @@ export const Layout: React.FC = () => {
                 {user.email} · {user.perfil === 'admin' ? 'Administração' : 'Recepção'}
               </p>
             </div>
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-emerald-100 hover:text-white bg-emerald-900/70 hover:bg-emerald-800 rounded-lg transition-colors whitespace-nowrap cursor-pointer"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span>Sair</span>
-            </button>
+            <div className="grid grid-cols-2 gap-2">
+              <Link
+                to="/minha-senha"
+                className="flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-emerald-100 hover:text-white bg-emerald-900/70 hover:bg-emerald-800 rounded-lg transition-colors whitespace-nowrap"
+              >
+                <KeyRound className="w-3.5 h-3.5" />
+                <span>Senha</span>
+              </Link>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-emerald-100 hover:text-white bg-emerald-900/70 hover:bg-emerald-800 rounded-lg transition-colors whitespace-nowrap cursor-pointer"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Sair</span>
+              </button>
+            </div>
           </div>
         )}
       </aside>
@@ -194,7 +224,7 @@ export const Layout: React.FC = () => {
         aria-label="Navegação principal"
         className="no-print lg:hidden fixed bottom-0 inset-x-0 z-30 bg-white border-t border-slate-200 pb-[env(safe-area-inset-bottom)]"
       >
-        <div className="grid grid-cols-3 max-w-lg mx-auto">
+        <div className="grid grid-cols-4 max-w-lg mx-auto">
           {itensNavegacaoMovel.map(({ to, rotulo, Icone, ativo }) => (
             <Link
               key={to}

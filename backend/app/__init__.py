@@ -5,6 +5,7 @@ from app.extensions import init_db
 from app.routes.auth_routes import auth_bp
 from app.routes.health_routes import health_bp
 from app.routes.reserva_routes import reserva_bp
+from app.routes.usuario_routes import usuario_bp
 from app.utils.errors import register_error_handlers
 
 
@@ -42,5 +43,6 @@ def create_app(testing: bool = False) -> Flask:
     app.register_blueprint(health_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(reserva_bp)
+    app.register_blueprint(usuario_bp)
 
     return app

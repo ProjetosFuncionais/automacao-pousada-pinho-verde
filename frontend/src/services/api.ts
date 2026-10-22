@@ -1,5 +1,7 @@
 import {
   ApiErrorResponse,
+  NovoUsuarioPayload,
+  PerfilUsuario,
   Profile,
   Reserva,
   ReservaPayload,
@@ -176,5 +178,47 @@ export const apiService = {
     return requestFlaskApi<VoucherData>(
       `/reservas/${encodeURIComponent(id)}/voucher`
     );
+  },
+
+  registrarPagamento(id: string, valor: number): Promise<Reserva> {
+    return requestFlaskApi<Reserva>(
+      `/reservas/${encodeURIComponent(id)}/pagamentos`,
+      { method: 'POST', body: JSON.stringify({ valor }) }
+    );
+  },
+
+  alterarMinhaSenha(senhaAtual: string, senhaNova: string): Promise<void> {
+    return requestFlaskApi<void>('/me/senha', {
+      method: 'PUT',
+      body: JSON.stringify({ senha_atual: senhaAtual, senha_nova: senhaNova }),
+    });
+  },
+
+  listarUsuarios(): Promise<Profile[]> {
+    return requestFlaskApi<Profile[]>('/usuarios');
+  },
+
+  criarUsuario(payload: NovoUsuarioPayload): Promise<Profile> {
+    return requestFlaskApi<Profile>('/usuarios', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+
+  atualizarUsuario(
+    id: string,
+    dados: { ativo?: boolean; perfil?: PerfilUsuario }
+  ): Promise<Profile> {
+    return requestFlaskApi<Profile>(`/usuarios/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      body: JSON.stringify(dados),
+    });
+  },
+
+  redefinirSenhaUsuario(id: string, senha: string): Promise<void> {
+    return requestFlaskApi<void>(`/usuarios/${encodeURIComponent(id)}/senha`, {
+      method: 'PUT',
+      body: JSON.stringify({ senha }),
+    });
   },
 };

@@ -72,3 +72,48 @@ class ProfileRepository:
             .fetchall()
         )
         return [serializar_linha(linha) for linha in linhas]
+
+    @classmethod
+    def buscar_hash_por_id(cls, user_id: str) -> Optional[str]:
+        linha = (
+            get_db()
+            .execute("SELECT senha_hash FROM profiles WHERE id = %s", (user_id,))
+            .fetchone()
+        )
+        return linha["senha_hash"] if linha else None
+
+    @classmethod
+    def atualizar_senha_por_id(cls, user_id: str, senha_hash: str) -> bool:
+        cursor = get_db().execute(
+            "UPDATE profiles SET senha_hash = %s WHERE id = %s",
+            (senha_hash, user_id),
+        )
+        return cursor.rowcount > 0
+
+    @classmethod
+    def atualizar_acesso(
+        cls, user_id: str, ativo: Optional[bool] = None, perfil: Optional[str] = None
+    ) -> Optional[dict[str, Any]]:
+        linha = (
+            get_db()
+            .execute(
+                f"""
+                UPDATE profiles
+                SET ativo = COALESCE(%s, ativo), perfil = COALESCE(%s, perfil)
+                WHERE id = %s
+                RETURNING {cls.COLUMNS}
+                """,
+                (ativo, perfil, user_id),
+            )
+            .fetchone()
+        )
+        return serializar_linha(linha)
+
+    @classmethod
+    def contar_admins_ativos(cls) -> int:
+        linha = (
+            get_db()
+            .execute("SELECT count(*) AS n FROM profiles WHERE perfil = 'admin' AND ativo")
+            .fetchone()
+        )
+        return int(linha["n"])

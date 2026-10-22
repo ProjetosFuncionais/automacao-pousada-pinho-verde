@@ -132,3 +132,55 @@ class ReservaRepository:
             .fetchone()
         )
         return serializar_linha(linha)
+
+    @classmethod
+    def buscar_conflito(
+        cls,
+        numero_chale: str,
+        data_checkin: str,
+        data_checkout: str,
+        ignorar_id: Optional[str] = None,
+    ) -> Optional[dict[str, Any]]:
+        """Reserva confirmada no mesmo chalé com período sobreposto.
+
+        O dia do check-out pode ser o check-in de outra reserva.
+        """
+        linha = (
+            get_db()
+            .execute(
+                """
+                SELECT id, nome_completo, numero_chale, data_checkin, data_checkout
+                FROM reservas
+                WHERE status = 'confirmada'
+                  AND lower(trim(numero_chale)) = lower(trim(%s))
+                  AND data_checkin < %s
+                  AND data_checkout > %s
+                  AND (%s::uuid IS NULL OR id <> %s::uuid)
+                ORDER BY data_checkin
+                LIMIT 1
+                """,
+                (numero_chale, data_checkout, data_checkin, ignorar_id, ignorar_id),
+            )
+            .fetchone()
+        )
+        return serializar_linha(linha)
+
+    @classmethod
+    def somar_pagamento(cls, reserva_id: str, valor: float) -> Optional[dict[str, Any]]:
+        """Soma o valor ao já pago, sem passar do total. None se não couber."""
+        linha = (
+            get_db()
+            .execute(
+                f"""
+                UPDATE reservas
+                SET valor_total_pago = valor_total_pago + %s
+                WHERE id = %s
+                  AND status = 'confirmada'
+                  AND valor_total_pago + %s <= valor_total_hospedagem
+                RETURNING {cls.COLUMNS}
+                """,
+                (valor, reserva_id, valor),
+            )
+            .fetchone()
+        )
+        return serializar_linha(linha)

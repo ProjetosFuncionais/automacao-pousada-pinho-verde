@@ -17,6 +17,7 @@ import {
 } from '../utils/formatters';
 import { ReservaCard } from '../components/ReservaCard';
 import { ReceitaMensalChart } from '../components/ReceitaMensalChart';
+import { AgendaChegadasSaidas } from '../components/AgendaChegadasSaidas';
 
 export const DashboardPage: React.FC = () => {
   const [reservas, setReservas] = useState<Reserva[]>([]);
@@ -173,6 +174,8 @@ export const DashboardPage: React.FC = () => {
           </div>
         </div>
       </section>
+
+      <AgendaChegadasSaidas reservas={reservas} carregando={carregando} />
 
       <ReceitaMensalChart reservas={reservas} carregando={carregando} />
 

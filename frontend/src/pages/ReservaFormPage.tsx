@@ -23,6 +23,7 @@ import {
   calcularSaldoReserva,
   formatarInputMoeda,
   formatarMoedaBRL,
+  hojeLocalIso,
 } from '../utils/formatters';
 
 export const ReservaFormPage: React.FC = () => {
@@ -37,10 +38,9 @@ export const ReservaFormPage: React.FC = () => {
   const [textoValorTotal, setTextoValorTotal] = useState<string>('R$ 0,00');
   const [textoValorPago, setTextoValorPago] = useState<string>('R$ 0,00');
 
-  const hojeIso = new Date().toISOString().slice(0, 10);
-  const amanhaIso = new Date(Date.now() + 2 * 86400000)
-    .toISOString()
-    .slice(0, 10);
+  // Datas no fuso do navegador (toISOString usaria UTC e erraria o dia à noite).
+  const hojeIso = hojeLocalIso();
+  const checkoutPadraoIso = hojeLocalIso(2);
 
   const {
     register,
@@ -60,7 +60,7 @@ export const ReservaFormPage: React.FC = () => {
       numero_chale: LISTA_CHALES_SUGERIDOS[0],
       quantidade_pessoas: 2,
       data_checkin: hojeIso,
-      data_checkout: amanhaIso,
+      data_checkout: checkoutPadraoIso,
       valor_total_hospedagem: 0,
       valor_total_pago: 0,
       descricao: '',

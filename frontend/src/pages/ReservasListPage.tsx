@@ -23,6 +23,8 @@ import { ReservaCard } from '../components/ReservaCard';
 export const ReservasListPage: React.FC = () => {
   const [reservas, setReservas] = useState<Reserva[]>([]);
   const [busca, setBusca] = useState<string>('');
+  // Só busca no servidor quando a pessoa para de digitar por um instante.
+  const [buscaAplicada, setBuscaAplicada] = useState<string>('');
   const [statusFiltro, setStatusFiltro] = useState<StatusReserva | 'todas'>('todas');
   const [carregando, setCarregando] = useState<boolean>(true);
   const [erro, setErro] = useState<string | null>(null);
@@ -37,7 +39,7 @@ export const ReservasListPage: React.FC = () => {
     try {
       setCarregando(true);
       const lista = await apiService.listarReservas({
-        busca,
+        busca: buscaAplicada,
         status: statusFiltro,
       });
       setReservas(lista);
@@ -51,7 +53,12 @@ export const ReservasListPage: React.FC = () => {
     } finally {
       setCarregando(false);
     }
-  }, [busca, statusFiltro]);
+  }, [buscaAplicada, statusFiltro]);
+
+  useEffect(() => {
+    const espera = setTimeout(() => setBuscaAplicada(busca), 300);
+    return () => clearTimeout(espera);
+  }, [busca]);
 
   useEffect(() => {
     carregarReservas();
@@ -63,7 +70,7 @@ export const ReservasListPage: React.FC = () => {
       setCancelando(true);
       await apiService.cancelarReserva(reservaParaCancelar.id);
       setMensagemSucesso(
-        `A reserva de ${reservaParaCancelar.nome_completo} foi marcada como cancelada e preservada no histórico.`
+        `A reserva de ${reservaParaCancelar.nome_completo} foi cancelada. Ela continua no histórico.`
       );
       setReservaParaCancelar(null);
       await carregarReservas();
