@@ -57,6 +57,15 @@
     display: none !important;
   }
 
+  .assinaturas {
+    break-inside: avoid;
+  }
+
+  /* Sem o recuo de cima da área de conteúdo: a ficha começa no topo da folha. */
+  main {
+    padding-top: 0 !important;
+  }
+
   .print-only-container {
     box-shadow: none !important;
     border: 1px solid #CBD5E1 !important;

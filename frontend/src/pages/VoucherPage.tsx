@@ -105,8 +105,8 @@ export const VoucherPage: React.FC = () => {
         </div>
       </div>
 
-      <article className="print-only-container bg-white border border-slate-300 rounded-xl p-5 sm:p-10 space-y-7 sm:space-y-8 text-slate-900">
-        <header className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 sm:gap-6 border-b border-slate-300 pb-5 sm:pb-6">
+      <article className="print-only-container bg-white border border-slate-300 rounded-xl p-5 sm:p-10 space-y-7 sm:space-y-8 print:space-y-5 text-slate-900">
+        <header className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 sm:gap-6 border-b border-slate-300 pb-5 sm:pb-6 print:pb-4">
           <div className="space-y-1.5">
             <div className="flex items-center gap-2.5">
               <Trees className="w-6 h-6 text-emerald-800" />
@@ -255,11 +255,39 @@ export const VoucherPage: React.FC = () => {
           <h2 className="text-xs font-semibold text-slate-500 border-b border-slate-200 pb-1.5">
             Políticas da pousada
           </h2>
-          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-xs text-slate-700 leading-relaxed list-disc pl-4">
+          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 print:gap-y-1 text-xs text-slate-700 leading-relaxed print:leading-snug list-disc pl-4">
             {politicas.map((politica, index) => (
               <li key={index}>{politica}</li>
             ))}
           </ul>
+        </section>
+
+        <section className="assinaturas space-y-5" aria-label="Assinaturas">
+          <p className="text-xs text-slate-700">
+            Declaro que conferi os dados desta reserva e que li e concordo com as
+            políticas da pousada.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-8">
+            <div className="pt-7">
+              <div className="border-t border-slate-500" />
+              <p className="mt-1.5 text-xs font-semibold text-slate-800">
+                Assinatura do hóspede
+              </p>
+              <p className="text-xs text-slate-500 tabular-nums">
+                {reserva.nome_completo} · CPF {reserva.cpf}
+              </p>
+            </div>
+            <div className="pt-7">
+              <div className="border-t border-slate-500" />
+              <p className="mt-1.5 text-xs font-semibold text-slate-800">
+                Recepção
+              </p>
+              <p className="text-xs text-slate-500">Pousada Pinho Verde</p>
+            </div>
+          </div>
+          <p className="text-xs text-slate-700 tabular-nums">
+            Data: ______/______/__________
+          </p>
         </section>
 
         <footer className="no-print pt-6 border-t border-slate-300 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-500 tabular-nums">
