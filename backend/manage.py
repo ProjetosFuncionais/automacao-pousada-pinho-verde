@@ -1,13 +1,4 @@
-"""Comandos de administração do banco e dos usuários.
 
-Uso (dentro da pasta backend, com DATABASE_URL no .env):
-    python manage.py init-db
-    python manage.py criar-usuario EMAIL "NOME COMPLETO" [--perfil admin|recepcao]
-    python manage.py redefinir-senha EMAIL
-    python manage.py desativar-usuario EMAIL
-    python manage.py ativar-usuario EMAIL
-    python manage.py listar-usuarios
-"""
 import argparse
 import getpass
 import sys
