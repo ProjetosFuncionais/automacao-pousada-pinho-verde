@@ -22,7 +22,7 @@ export const ConfirmCancelModal: React.FC<ConfirmCancelModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/50 backdrop-blur-xs sm:p-4"
+      className="fixed inset-0 z-50 m-0 flex items-end sm:items-center justify-center bg-slate-900/50 backdrop-blur-xs sm:p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-cancelar-titulo"

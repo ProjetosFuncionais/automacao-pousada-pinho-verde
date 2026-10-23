@@ -24,6 +24,19 @@ class Config:
     JWT_SECRET: str = os.getenv("JWT_SECRET", "")
     JWT_EXPIRES_HOURS: int = int(os.getenv("JWT_EXPIRES_HOURS", "12"))
 
+    # Envio de e-mail (SMTP). Funciona com Gmail, Resend, Brevo etc.
+    SMTP_HOST: str = os.getenv("SMTP_HOST", "")
+    SMTP_PORT: int = int(os.getenv("SMTP_PORT", "587"))
+    SMTP_USUARIO: str = os.getenv("SMTP_USUARIO", "")
+    SMTP_SENHA: str = os.getenv("SMTP_SENHA", "")
+    EMAIL_REMETENTE: str = os.getenv("EMAIL_REMETENTE", "") or SMTP_USUARIO
+    EMAIL_REMETENTE_NOME: str = os.getenv("EMAIL_REMETENTE_NOME", "Pousada Pinho Verde")
+    EMAIL_RESPONDER_PARA: str = os.getenv("EMAIL_RESPONDER_PARA", "")
+
+    @classmethod
+    def email_configurado(cls) -> bool:
+        return bool(cls.SMTP_HOST and cls.SMTP_USUARIO and cls.SMTP_SENHA and cls.EMAIL_REMETENTE)
+
     @classmethod
     def validate(cls) -> None:
         if cls.TESTING:

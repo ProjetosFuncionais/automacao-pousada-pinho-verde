@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, CheckCircle2, Printer, Trees, XCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Mail, Printer, Trees, XCircle } from 'lucide-react';
 import { apiService, ApiClientError } from '../services/api';
 import { VoucherData } from '../types/reserva';
 import {
@@ -9,6 +9,7 @@ import {
   formatarMoedaBRL,
 } from '../utils/formatters';
 import { AccessDeniedOrNotFoundPage } from './AccessDeniedOrNotFoundPage';
+import { EnviarVoucherEmailModal } from '../components/EnviarVoucherEmailModal';
 
 export const VoucherPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -16,6 +17,8 @@ export const VoucherPage: React.FC = () => {
   const [carregando, setCarregando] = useState<boolean>(true);
   const [naoEncontrado, setNaoEncontrado] = useState<boolean>(false);
   const [erro, setErro] = useState<string | null>(null);
+  const [modalEmailAberto, setModalEmailAberto] = useState(false);
+  const [avisoEmail, setAvisoEmail] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -93,7 +96,17 @@ export const VoucherPage: React.FC = () => {
           </Link>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+          {reserva.status === 'confirmada' && (
+            <button
+              type="button"
+              onClick={() => setModalEmailAberto(true)}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-3 sm:py-2 text-sm sm:text-xs font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 rounded-lg transition-colors whitespace-nowrap cursor-pointer"
+            >
+              <Mail className="w-4 h-4" />
+              <span>Enviar por e-mail</span>
+            </button>
+          )}
           <button
             type="button"
             onClick={handleImprimirOuSalvarPdf}
@@ -104,6 +117,25 @@ export const VoucherPage: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {avisoEmail && (
+        <div role="status" className="no-print p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-medium text-emerald-900">
+          {avisoEmail}
+        </div>
+      )}
+
+      <EnviarVoucherEmailModal
+        aberto={modalEmailAberto}
+        reservaId={reserva.id}
+        nomeHospede={reserva.nome_completo}
+        emailSalvo={reserva.email}
+        onEnviado={(email, mensagem) => {
+          setModalEmailAberto(false);
+          setAvisoEmail(mensagem);
+          setVoucher((v) => (v ? { ...v, reserva: { ...v.reserva, email } } : v));
+        }}
+        onFechar={() => setModalEmailAberto(false)}
+      />
 
       <article className="print-only-container bg-white border border-slate-300 rounded-xl p-5 sm:p-10 space-y-7 sm:space-y-8 print:space-y-5 text-slate-900">
         <header className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 sm:gap-6 border-b border-slate-300 pb-5 sm:pb-6 print:pb-4">

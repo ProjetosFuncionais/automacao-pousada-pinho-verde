@@ -1,3 +1,4 @@
+import re
 from typing import Any
 from decimal import Decimal
 from app.utils.errors import APIError
@@ -10,6 +11,19 @@ from app.utils.validators import (
     validar_cpf,
     validar_whatsapp,
 )
+
+
+_EMAIL_VALIDO = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+
+def validar_email_opcional(valor: Any) -> tuple[str | None, str | None]:
+    """Devolve (email normalizado ou None, mensagem de erro ou None)."""
+    email = str(valor or "").strip().lower()
+    if not email:
+        return None, None
+    if len(email) > 255 or not _EMAIL_VALIDO.match(email):
+        return None, "Informe um e-mail válido (ex: nome@gmail.com)."
+    return email, None
 
 
 def validar_payload_reserva(payload: Any) -> dict[str, Any]:
@@ -45,6 +59,10 @@ def validar_payload_reserva(payload: Any) -> dict[str, Any]:
         erros_campos["whatsapp"] = (
             "Informe um telefone/WhatsApp válido com DDD (10 ou 11 dígitos)."
         )
+
+    email, erro_email = validar_email_opcional(payload.get("email"))
+    if erro_email:
+        erros_campos["email"] = erro_email
 
     endereco = str(payload.get("endereco") or "").strip()
     if len(endereco) < 5:
@@ -146,6 +164,7 @@ def validar_payload_reserva(payload: Any) -> dict[str, Any]:
         "nome_completo": nome_completo,
         "cpf": formatar_cpf(cpf_bruto),
         "whatsapp": formatar_whatsapp(whatsapp_bruto),
+        "email": email,
         "endereco": endereco,
         "numero_chale": numero_chale,
         "quantidade_pessoas": quantidade_pessoas,

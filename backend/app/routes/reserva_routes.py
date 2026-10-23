@@ -65,3 +65,15 @@ def obter_voucher_reserva(reserva_id: str):
         reserva_id=reserva_id, emitido_por_nome=emitido_por
     )
     return jsonify(voucher), 200
+
+
+@reserva_bp.post("/<string:reserva_id>/voucher/email")
+@require_auth
+def enviar_voucher_email(reserva_id: str):
+    emitido_por = g.current_user.get("nome_completo", "Recepção Pousada Pinho Verde")
+    resultado = VoucherService.enviar_por_email(
+        reserva_id=reserva_id,
+        payload=request.get_json(silent=True),
+        emitido_por_nome=emitido_por,
+    )
+    return jsonify(resultado), 200

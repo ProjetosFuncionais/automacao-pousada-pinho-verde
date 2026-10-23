@@ -180,6 +180,16 @@ export const apiService = {
     );
   },
 
+  enviarVoucherPorEmail(
+    id: string,
+    email: string
+  ): Promise<{ mensagem: string; email: string }> {
+    return requestFlaskApi(`/reservas/${encodeURIComponent(id)}/voucher/email`, {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  },
+
   registrarPagamento(id: string, valor: number): Promise<Reserva> {
     return requestFlaskApi<Reserva>(
       `/reservas/${encodeURIComponent(id)}/pagamentos`,

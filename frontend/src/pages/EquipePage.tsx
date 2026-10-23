@@ -273,7 +273,7 @@ export const EquipePage: React.FC = () => {
       </div>
 
       {senhaPara && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/50 backdrop-blur-xs sm:p-4" role="dialog" aria-modal="true" aria-labelledby="titulo-redefinir">
+        <div className="fixed inset-0 z-50 m-0 flex items-end sm:items-center justify-center bg-slate-900/50 backdrop-blur-xs sm:p-4" role="dialog" aria-modal="true" aria-labelledby="titulo-redefinir">
           <form onSubmit={redefinirSenha} className="bg-white border border-slate-200 rounded-t-2xl sm:rounded-xl sm:max-w-md w-full p-5 sm:p-6 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:pb-6 space-y-4">
             <div>
               <h3 id="titulo-redefinir" className="text-base font-semibold text-slate-900">Redefinir senha</h3>

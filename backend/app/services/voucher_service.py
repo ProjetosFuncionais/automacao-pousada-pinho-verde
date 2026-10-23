@@ -1,6 +1,11 @@
 from datetime import datetime, timezone
 from typing import Any
+from app.repositories.reserva_repository import ReservaRepository
+from app.schemas.reserva_schema import validar_email_opcional
+from app.services.email_service import EmailService
 from app.services.reserva_service import ReservaService
+from app.services.voucher_email import montar_email_voucher
+from app.utils.errors import APIError
 from app.utils.validators import parse_data_iso
 
 POLITICAS_POUSADA_PINHO_VERDE: list[str] = [
@@ -48,3 +53,30 @@ class VoucherService:
             },
             "politicas": POLITICAS_POUSADA_PINHO_VERDE,
         }
+
+    @classmethod
+    def enviar_por_email(cls, reserva_id: str, payload: Any, emitido_por_nome: str) -> dict[str, Any]:
+        voucher = cls.gerar_voucher(reserva_id, emitido_por_nome)
+        reserva = voucher["reserva"]
+        if reserva.get("status") == "cancelada":
+            raise APIError(
+                erro="conflito_estado",
+                mensagem="Não é possível enviar o voucher de uma reserva cancelada.",
+                status_code=409,
+            )
+
+        informado = (payload or {}).get("email") if isinstance(payload, dict) else None
+        email, erro = validar_email_opcional(informado or reserva.get("email"))
+        if erro or not email:
+            raise APIError(
+                erro="erro_validacao",
+                mensagem=erro or "Informe o e-mail do hóspede.",
+                status_code=422,
+                campos={"email": erro or "Informe o e-mail do hóspede."},
+            )
+
+        assunto, html, texto = montar_email_voucher(voucher)
+        EmailService.enviar(email, assunto, html, texto)
+        # Guarda o e-mail na reserva para os próximos envios.
+        ReservaRepository.salvar_email(reserva["id"], email)
+        return {"mensagem": f"Voucher enviado para {email}.", "email": email}

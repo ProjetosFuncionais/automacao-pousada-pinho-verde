@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import {
   ArrowLeft,
   Banknote,
+  Mail,
   CheckCircle2,
   Edit3,
   FileText,
@@ -23,6 +24,7 @@ import {
 } from '../utils/formatters';
 import { ConfirmCancelModal } from '../components/ConfirmCancelModal';
 import { RegistrarPagamentoModal } from '../components/RegistrarPagamentoModal';
+import { EnviarVoucherEmailModal } from '../components/EnviarVoucherEmailModal';
 import { AccessDeniedOrNotFoundPage } from './AccessDeniedOrNotFoundPage';
 
 export const ReservaDetailPage: React.FC = () => {
@@ -36,6 +38,7 @@ export const ReservaDetailPage: React.FC = () => {
   const [cancelando, setCancelando] = useState<boolean>(false);
   const [avisoSucesso, setAvisoSucesso] = useState<string | null>(null);
   const [modalPagamentoAberto, setModalPagamentoAberto] = useState(false);
+  const [modalEmailAberto, setModalEmailAberto] = useState(false);
   const [registrandoPagamento, setRegistrandoPagamento] = useState(false);
   const [erroPagamento, setErroPagamento] = useState<string | null>(null);
 
@@ -195,6 +198,14 @@ export const ReservaDetailPage: React.FC = () => {
                   <span>Registrar pagamento</span>
                 </button>
               )}
+              <button
+                type="button"
+                onClick={() => setModalEmailAberto(true)}
+                className="col-span-2 sm:col-span-1 inline-flex items-center justify-center gap-1.5 px-3.5 py-3 sm:py-2 text-sm sm:text-xs font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg transition-colors whitespace-nowrap cursor-pointer"
+              >
+                <Mail className="w-3.5 h-3.5" />
+                <span>Enviar por e-mail</span>
+              </button>
               <a
                 href={montarLinkWhatsappReserva(reserva)}
                 target="_blank"
@@ -295,6 +306,18 @@ export const ReservaDetailPage: React.FC = () => {
                 </dd>
               </div>
               <div>
+                <dt className="text-xs text-slate-500">E-mail</dt>
+                <dd className="text-slate-800 break-all">
+                  {reserva.email ? (
+                    <a href={`mailto:${reserva.email}`} className="text-emerald-800 underline underline-offset-4">
+                      {reserva.email}
+                    </a>
+                  ) : (
+                    <span className="text-slate-500">Não informado</span>
+                  )}
+                </dd>
+              </div>
+              <div>
                 <dt className="text-xs text-slate-500">Endereço</dt>
                 <dd className="text-slate-800">{reserva.endereco}</dd>
               </div>
@@ -348,6 +371,19 @@ export const ReservaDetailPage: React.FC = () => {
           <span>Última atualização: {formatarDataHoraBR(reserva.updated_at)}</span>
         </div>
       </div>
+
+      <EnviarVoucherEmailModal
+        aberto={modalEmailAberto}
+        reservaId={reserva.id}
+        nomeHospede={reserva.nome_completo}
+        emailSalvo={reserva.email}
+        onEnviado={(email, mensagem) => {
+          setModalEmailAberto(false);
+          setAvisoSucesso(mensagem);
+          setReserva({ ...reserva, email });
+        }}
+        onFechar={() => setModalEmailAberto(false)}
+      />
 
       <RegistrarPagamentoModal
         aberto={modalPagamentoAberto}

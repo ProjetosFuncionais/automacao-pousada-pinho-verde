@@ -56,6 +56,7 @@ export const ReservaFormPage: React.FC = () => {
       nome_completo: '',
       cpf: '',
       whatsapp: '',
+      email: '',
       endereco: '',
       numero_chale: LISTA_CHALES_SUGERIDOS[0],
       quantidade_pessoas: 2,
@@ -101,6 +102,7 @@ export const ReservaFormPage: React.FC = () => {
           nome_completo: reserva.nome_completo,
           cpf: aplicarMascaraCpf(reserva.cpf),
           whatsapp: aplicarMascaraWhatsapp(reserva.whatsapp),
+          email: reserva.email || '',
           endereco: reserva.endereco,
           numero_chale: reserva.numero_chale,
           quantidade_pessoas: reserva.quantidade_pessoas,
@@ -324,7 +326,29 @@ export const ReservaFormPage: React.FC = () => {
               )}
             </div>
 
-            <div className="sm:col-span-12">
+            <div className="sm:col-span-5">
+              <label
+                htmlFor="email"
+                className="block text-xs font-semibold text-slate-700 mb-1.5"
+              >
+                E-mail (para enviar o voucher)
+              </label>
+              <input
+                id="email"
+                type="email"
+                inputMode="email"
+                autoComplete="off"
+                autoCapitalize="none"
+                placeholder="nome@gmail.com"
+                {...register('email')}
+                className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:border-emerald-700"
+              />
+              {errors.email && (
+                <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>
+              )}
+            </div>
+
+            <div className="sm:col-span-7">
               <label
                 htmlFor="endereco"
                 className="block text-xs font-semibold text-slate-700 mb-1.5"

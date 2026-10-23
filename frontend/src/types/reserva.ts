@@ -16,6 +16,7 @@ export interface Reserva {
   nome_completo: string;
   cpf: string;
   whatsapp: string;
+  email: string | null;
   endereco: string;
   numero_chale: string;
   quantidade_pessoas: number;
@@ -35,6 +36,7 @@ export interface ReservaPayload {
   nome_completo: string;
   cpf: string;
   whatsapp: string;
+  email?: string | null;
   endereco: string;
   numero_chale: string;
   quantidade_pessoas: number;

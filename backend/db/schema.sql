@@ -139,3 +139,6 @@ CREATE INDEX IF NOT EXISTS idx_tentativas_login_ip
 
 COMMENT ON TABLE public.tentativas_login IS
 'Falhas de login recentes. Usada para bloquear temporariamente após muitas senhas erradas.';
+
+-- E-mail do hóspede (opcional), usado para enviar o voucher.
+ALTER TABLE public.reservas ADD COLUMN IF NOT EXISTS email VARCHAR(255);

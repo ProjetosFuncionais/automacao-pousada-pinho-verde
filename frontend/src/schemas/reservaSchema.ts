@@ -40,6 +40,14 @@ export const reservaSchema = z
           message: 'Informe um WhatsApp válido com DDD (10 ou 11 dígitos).',
         }
       ),
+    email: z
+      .string()
+      .trim()
+      .max(255, 'O e-mail deve ter no máximo 255 caracteres.')
+      .refine((val) => !val || /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(val), {
+        message: 'Informe um e-mail válido (ex: nome@gmail.com).',
+      })
+      .optional(),
     endereco: z
       .string()
       .trim()

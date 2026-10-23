@@ -7,7 +7,7 @@ from app.utils.db import serializar_linha
 class ReservaRepository:
 
     COLUMNS = (
-        "id, nome_completo, cpf, whatsapp, endereco, numero_chale, "
+        "id, nome_completo, cpf, whatsapp, email, endereco, numero_chale, "
         "quantidade_pessoas, data_checkin, data_checkout, "
         "valor_total_hospedagem, valor_total_pago, valor_total_receber, "
         "descricao, status, criado_por, created_at, updated_at"
@@ -15,7 +15,7 @@ class ReservaRepository:
 
     # Colunas que a API pode gravar. valor_total_receber é calculado pelo banco.
     COLUNAS_GRAVAVEIS = (
-        "nome_completo", "cpf", "whatsapp", "endereco", "numero_chale",
+        "nome_completo", "cpf", "whatsapp", "email", "endereco", "numero_chale",
         "quantidade_pessoas", "data_checkin", "data_checkout",
         "valor_total_hospedagem", "valor_total_pago", "descricao",
         "status", "criado_por",
@@ -184,3 +184,10 @@ class ReservaRepository:
             .fetchone()
         )
         return serializar_linha(linha)
+
+    @classmethod
+    def salvar_email(cls, reserva_id: str, email: str) -> None:
+        get_db().execute(
+            "UPDATE reservas SET email = %s WHERE id = %s AND email IS DISTINCT FROM %s",
+            (email, reserva_id, email),
+        )
