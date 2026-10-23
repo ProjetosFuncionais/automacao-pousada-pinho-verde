@@ -5,7 +5,7 @@ Sistema web full stack desenvolvido para a recepção e administração da **Pou
 ---
 
 ## 1. Objetivo do Projeto
-
+--
 Centralizar a operação diária de reservas da Pousada Pinho Verde garantindo:
 - Login próprio de funcionários (senha em hash + token JWT) com verificação de perfil ativo (`admin` ou `recepcao`).
 - Cadastro e atualização de reservas com máscaras de CPF, WhatsApp e moeda (`R$`).
