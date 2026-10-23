@@ -111,3 +111,19 @@ def test_email_invalido_no_cadastro_da_reserva(client, cabecalho, payload_reserv
     resp = client.post("/api/reservas", json={**payload_reserva_valida, "email": "errado"}, headers=cabecalho)
     assert resp.status_code == 422
     assert "email" in resp.get_json()["campos"]
+
+
+def test_resend_em_modo_teste_explica_o_motivo(client, cabecalho, smtp_configurado):
+    import smtplib
+    smtp_configurado.send_message.side_effect = smtplib.SMTPDataError(
+        550, b"You can only send testing emails to your own email address. Please verify a domain."
+    )
+    with (
+        patch(f"{REPO_RESERVA}.buscar_por_id", return_value=_reserva()),
+        patch(f"{REPO_RESERVA}.salvar_email") as salvar,
+    ):
+        resp = client.post(f"/api/reservas/{RESERVA_ID}/voucher/email", json={"email": "hospede@gmail.com"}, headers=cabecalho)
+    assert resp.status_code == 503
+    assert resp.get_json()["erro"] == "email_modo_teste"
+    assert "modo de teste" in resp.get_json()["mensagem"]
+    salvar.assert_not_called()

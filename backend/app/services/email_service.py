@@ -52,6 +52,26 @@ class EmailService:
                 status_code=422,
                 campos={"email": "Endereço recusado pelo servidor de e-mail."},
             ) from exc
+        except smtplib.SMTPDataError as exc:
+            detalhe = (exc.smtp_error or b"").decode("utf-8", "replace").lower()
+            if "testing emails" in detalhe or "verify a domain" in detalhe:
+                # Resend sem domínio verificado só entrega no e-mail do dono da conta.
+                raise APIError(
+                    erro="email_modo_teste",
+                    mensagem=(
+                        "O serviço de e-mail está em modo de teste e só envia para o e-mail "
+                        "do dono da conta. Para enviar aos hóspedes, verifique um domínio no "
+                        "Resend ou use o Gmail da pousada."
+                    ),
+                    status_code=503,
+                ) from exc
+            if has_app_context():
+                current_app.logger.error("E-mail recusado pelo servidor: %s", detalhe[:200])
+            raise APIError(
+                erro="email_falhou",
+                mensagem="O servidor de e-mail recusou a mensagem. Confira o e-mail do hóspede e tente de novo.",
+                status_code=502,
+            ) from exc
         except (smtplib.SMTPException, OSError) as exc:
             if has_app_context():
                 current_app.logger.error("Falha ao enviar e-mail: %s", type(exc).__name__)
