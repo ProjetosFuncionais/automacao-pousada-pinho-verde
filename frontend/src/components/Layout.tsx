@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   CalendarPlus,
+  CalendarRange,
   KeyRound,
   LayoutDashboard,
   ListFilter,
@@ -27,6 +28,7 @@ export const Layout: React.FC = () => {
   const obterTituloBreadcrumb = (): string => {
     if (path === '/' || path === '/dashboard') return 'Visão geral';
     if (path === '/reservas') return 'Reservas';
+    if (path === '/mapa') return 'Mapa de reservas';
     if (isNovaReserva) return 'Nova reserva';
     if (path.endsWith('/editar')) return 'Editar reserva';
     if (path.endsWith('/voucher')) return 'Voucher';
@@ -42,6 +44,12 @@ export const Layout: React.FC = () => {
       rotulo: 'Painel',
       Icone: LayoutDashboard,
       ativo: path === '/' || path === '/dashboard',
+    },
+    {
+      to: '/mapa',
+      rotulo: 'Mapa',
+      Icone: CalendarRange,
+      ativo: path === '/mapa',
     },
     {
       to: '/reservas',
@@ -90,6 +98,11 @@ export const Layout: React.FC = () => {
           >
             <LayoutDashboard className="w-4 h-4 shrink-0" />
             <span>Painel</span>
+          </NavLink>
+
+          <NavLink to="/mapa" className={classeItemMenu}>
+            <CalendarRange className="w-4 h-4 shrink-0" />
+            <span>Mapa</span>
           </NavLink>
 
           <NavLink
@@ -224,7 +237,7 @@ export const Layout: React.FC = () => {
         aria-label="Navegação principal"
         className="no-print lg:hidden fixed bottom-0 inset-x-0 z-30 bg-white border-t border-slate-200 pb-[env(safe-area-inset-bottom)]"
       >
-        <div className="grid grid-cols-4 max-w-lg mx-auto">
+        <div className="grid grid-cols-5 max-w-lg mx-auto">
           {itensNavegacaoMovel.map(({ to, rotulo, Icone, ativo }) => (
             <Link
               key={to}

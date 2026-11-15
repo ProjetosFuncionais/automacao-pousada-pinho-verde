@@ -12,6 +12,7 @@ import { VoucherPage } from './pages/VoucherPage';
 import { AccessDeniedOrNotFoundPage } from './pages/AccessDeniedOrNotFoundPage';
 import { EquipePage } from './pages/EquipePage';
 import { MinhaSenhaPage } from './pages/MinhaSenhaPage';
+import { MapaReservasPage } from './pages/MapaReservasPage';
 import { useAuth } from './hooks/useAuth';
 
 function SomenteAdmin({ children }: { children: React.ReactNode }) {
@@ -38,6 +39,7 @@ export default function App() {
           >
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/mapa" element={<MapaReservasPage />} />
             <Route path="/reservas" element={<ReservasListPage />} />
             <Route path="/reservas/nova" element={<ReservaFormPage />} />
             <Route path="/reservas/:id/editar" element={<ReservaFormPage />} />

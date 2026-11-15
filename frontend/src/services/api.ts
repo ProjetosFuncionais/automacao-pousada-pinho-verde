@@ -8,6 +8,7 @@ import {
   StatusReserva,
   VoucherData,
 } from '../types/reserva';
+import { LISTA_CHALES } from '../utils/chales';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
@@ -15,16 +16,7 @@ const STORAGE_KEY_TOKEN = 'pinho_verde_token_v1';
 
 export const EVENTO_SESSAO_EXPIRADA = 'pinho-verde:sessao-expirada';
 
-export const LISTA_CHALES_SUGERIDOS: string[] = [
-  'Chalé 01 - Araucária Imperial',
-  'Chalé 02 - Manacá da Serra',
-  'Chalé 03 - Pinho Bravo',
-  'Chalé 04 - Ipê Amarelo',
-  'Chalé 05 - Cedro do Mato',
-  'Chalé 06 - Vale das Neblinas (Master)',
-  'Chalé 07 - Bosque dos Pinhos',
-  'Chalé 08 - Mirante da Mantiqueira',
-];
+export const LISTA_CHALES_SUGERIDOS: string[] = LISTA_CHALES;
 
 export class ApiClientError extends Error {
   status: number;

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -28,6 +28,10 @@ import {
 
 export const ReservaFormPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  // Vindo do mapa de reservas: chalé e data de entrada já escolhidos.
+  const [parametros] = useSearchParams();
+  const chaleInicial = parametros.get('chale');
+  const checkinInicial = parametros.get('checkin');
   const isEdicao = Boolean(id);
   const navigate = useNavigate();
 
@@ -39,8 +43,13 @@ export const ReservaFormPage: React.FC = () => {
   const [textoValorPago, setTextoValorPago] = useState<string>('R$ 0,00');
 
   // Datas no fuso do navegador (toISOString usaria UTC e erraria o dia à noite).
-  const hojeIso = hojeLocalIso();
-  const checkoutPadraoIso = hojeLocalIso(2);
+  const checkinValido = /^\d{4}-\d{2}-\d{2}$/.test(checkinInicial || '');
+  const hojeIso = checkinValido ? (checkinInicial as string) : hojeLocalIso();
+  const checkoutPadraoIso = (() => {
+    const d = new Date(`${hojeIso}T12:00:00`);
+    d.setDate(d.getDate() + 2);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  })();
 
   const {
     register,
@@ -58,7 +67,7 @@ export const ReservaFormPage: React.FC = () => {
       whatsapp: '',
       email: '',
       endereco: '',
-      numero_chale: LISTA_CHALES_SUGERIDOS[0],
+      numero_chale: chaleInicial || LISTA_CHALES_SUGERIDOS[0],
       quantidade_pessoas: 2,
       data_checkin: hojeIso,
       data_checkout: checkoutPadraoIso,
